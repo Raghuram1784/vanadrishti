@@ -10,7 +10,8 @@ from ml.detector.detector import (
     denormalize_bbox,
     DEFAULT_MODEL_VERSION,
     DEFAULT_CONF_THRESHOLD,
-    CLASS_MAPPING
+    CLASS_MAPPING,
+    CLASS_THRESHOLDS
 )
 
 from ml.detector.visualization import (
@@ -31,5 +32,6 @@ __all__ = [
     "DEFAULT_MODEL_VERSION",
     "DEFAULT_CONF_THRESHOLD",
     "CLASS_MAPPING",
+    "CLASS_THRESHOLDS",
     "CLASS_COLORS"
 ]

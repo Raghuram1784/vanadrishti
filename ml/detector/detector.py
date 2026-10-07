@@ -37,7 +37,8 @@ if not logger.handlers:
 
 # Default model version: MDV6-yolov10-c (High performance, fast inference, CPU & edge friendly)
 DEFAULT_MODEL_VERSION = "MDV6-yolov10-c"
-DEFAULT_CONF_THRESHOLD = 0.25
+# DEFAULT_MODEL_VERSION = "MDV6-yolov10-e"
+DEFAULT_CONF_THRESHOLD = 0.20
 
 # Class ID to Label mapping from MegaDetector V6
 # 0: animal, 1: person, 2: vehicle
@@ -45,6 +46,14 @@ CLASS_MAPPING = {
     0: "animal",
     1: "person",
     2: "vehicle"
+}
+
+# Class-specific confidence thresholds
+# Used to eliminate false low-confidence vehicle alerts (e.g. on spectacles/ceiling fans)
+CLASS_THRESHOLDS = {
+    "animal": 0.20,
+    "person": 0.25,
+    "vehicle": 0.50
 }
 
 
@@ -163,15 +172,19 @@ class WildlifeDetector:
         if height == 0 or width == 0:
             return []
 
-        threshold = conf_threshold if conf_threshold is not None else self.default_conf_threshold
+        global_threshold = conf_threshold if conf_threshold is not None else self.default_conf_threshold
 
         # MegaDetector expects RGB image
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+        # Query MegaDetector at minimum threshold to capture candidates across all target classes
+        min_class_thresh = min(CLASS_THRESHOLDS.values())
+        model_query_thresh = min(global_threshold, min_class_thresh)
+
         # Run inference through PyTorch-Wildlife
         raw_results = self._model.single_image_detection(
             rgb_frame,
-            det_conf_thres=threshold
+            det_conf_thres=model_query_thresh
         )
 
         detections: List[Dict[str, Any]] = []
@@ -190,8 +203,16 @@ class WildlifeDetector:
             conf = float(confidences[idx])
             cid = int(class_ids[idx])
 
-            # Map class ID to human-readable string
+            # Map class ID to human-readable string first
             class_name = CLASS_MAPPING.get(cid, "animal")
+
+            # Calculate effective threshold: max(global_threshold, class_specific_threshold)
+            class_threshold = CLASS_THRESHOLDS.get(class_name, self.default_conf_threshold)
+            effective_threshold = max(global_threshold, class_threshold)
+
+            # Discard detection if confidence is below effective threshold for this class
+            if conf < effective_threshold:
+                continue
 
             # Calculate and clamp normalized coordinates [0.0, 1.0]
             x1_norm = max(0.0, min(1.0, float(x1_px / width)))
