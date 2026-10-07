@@ -1,0 +1,90 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Node & Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+.next/
+out/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.secret
+*.pem
+*.key
+
+# Model weights and checkpoints
+*.pt
+*.pth
+*.onnx
+*.engine
+*.bin
+*.weights
+*.safetensors
+models/
+weights/
+
+# Large media and raw datasets
+data/demo/*
+!data/demo/.gitkeep
+data/samples/*
+!data/samples/.gitkeep
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+
+# IDE and OS
+.idea/
+.vscode/
+pyrightconfig.json
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/

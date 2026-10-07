@@ -1,0 +1,30 @@
+[
+  {
+    "patrol_id": "PATROL-TATR-101",
+    "team_name": "Tiger Anti-Poaching Squad Alpha",
+    "range": "Moharli Core",
+    "leader": "Range Forest Officer S. Patil",
+    "contact": "+91-9876543210",
+    "shift": "morning",
+    "status": "on_patrol",
+    "waypoints": [
+      { "name": "Moharli Base Camp", "latitude": 20.2785, "longitude": 79.3124 },
+      { "name": "Telia Dam", "latitude": 20.2912, "longitude": 79.3245 },
+      { "name": "Khatoda Chowki", "latitude": 20.315, "longitude": 79.338 }
+    ]
+  },
+  {
+    "patrol_id": "PATROL-TATR-102",
+    "team_name": "Buffer Rapid Response Unit 2",
+    "range": "Kolara Buffer",
+    "leader": "Forester A. Shinde",
+    "contact": "+91-9876543211",
+    "shift": "night_watch",
+    "status": "scheduled",
+    "waypoints": [
+      { "name": "Kolara Gate Checkpoint", "latitude": 20.4121, "longitude": 79.3518 },
+      { "name": "Pangdi Beat Post", "latitude": 20.3812, "longitude": 79.3941 },
+      { "name": "Navegaon Camp", "latitude": 20.4401, "longitude": 79.3302 }
+    ]
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "camera_id": "CAM-TATR-001",
+    "name": "Moharli Gate Ingress",
+    "zone": "buffer",
+    "location": {
+      "latitude": 20.2785,
+      "longitude": 79.3124
+    },
+    "type": "gate_checkpoint",
+    "status": "active",
+    "stream_source": "data/demo/moharli_gate.mp4"
+  },
+  {
+    "camera_id": "CAM-TATR-002",
+    "name": "Telia Waterhole Tower",
+    "zone": "core",
+    "location": {
+      "latitude": 20.2912,
+      "longitude": 79.3245
+    },
+    "type": "waterhole_surveillance",
+    "status": "active",
+    "stream_source": "data/demo/telia_waterhole.mp4"
+  },
+  {
+    "camera_id": "CAM-TATR-003",
+    "name": "Kolsa Range Trail Cam 4",
+    "zone": "core",
+    "location": {
+      "latitude": 20.2014,
+      "longitude": 79.3871
+    },
+    "type": "trail_camera",
+    "status": "active",
+    "stream_source": "data/demo/kolsa_trail.mp4"
+  },
+  {
+    "camera_id": "CAM-TATR-004",
+    "name": "Kolara Buffer Forest Track",
+    "zone": "buffer",
+    "location": {
+      "latitude": 20.4121,
+      "longitude": 79.3518
+    },
+    "type": "boundary_watch",
+    "status": "active",
+    "stream_source": "data/demo/kolara_buffer.mp4"
+  }
+]
