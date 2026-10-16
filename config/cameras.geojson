@@ -122,6 +122,26 @@
         "patrol_authorized": false,
         "notes": "Simulated prototype trail camera node for laptop webcam field testing. Synthetic demo location; not real sanctuary coordinates."
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [79.315, 20.275]
+      },
+      "properties": {
+        "camera_id": "C-21",
+        "name": "Sector C-21 Mobile Patrol Camera — Android Hotspot Node",
+        "zone_name": "Demo Buffer Zone West",
+        "zone_type": "BUFFER",
+        "active": true,
+        "allowed_hours": {
+          "start": "05:00",
+          "end": "22:00"
+        },
+        "patrol_authorized": true,
+        "notes": "Physical Android phone camera stream ingested over Wi-Fi / hotspot for mobile ranger patrol monitoring."
+      }
     }
   ]
 }

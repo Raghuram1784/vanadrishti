@@ -10,9 +10,16 @@ import type {
   EventFilters,
   Health,
 } from "@/types/api";
-const BASE = (
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"
-).replace(/\/$/, "");
+export const getApiBase = () => {
+  if (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL.replace(/\/$/, "");
+  }
+  if (typeof window !== "undefined" && window.location?.hostname) {
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+  }
+  return "http://127.0.0.1:8000";
+};
+export const BASE = getApiBase();
 export const evidenceUrl = (path: string) => `${BASE}${path}`;
 export const liveUrl = () => `${BASE.replace(/^http/, 'ws')}/ws/events`;
 export const getEvent = (id: string) => request<Event>(`/api/events/${encodeURIComponent(id)}`);

@@ -3,13 +3,13 @@ from contextlib import suppress
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 router = APIRouter()
-ALLOWED_ORIGINS = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1') for port in (3000, 5173)}
+ALLOWED_HOSTS = ('localhost', '127.0.0.1', '192.168.', '10.', '172.')
 
 
 @router.websocket('/ws/events')
 async def live_events(socket: WebSocket):
     origin = socket.headers.get('origin')
-    if origin and origin not in ALLOWED_ORIGINS:
+    if origin and not any(h in origin for h in ALLOWED_HOSTS):
         await socket.close(code=1008)
         return
     await socket.accept()

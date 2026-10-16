@@ -66,12 +66,13 @@ class TestBackend(unittest.TestCase):
     def test_cameras(self):
         data = self.client.get('/api/cameras').json()
         self.assertTrue(data['simulated'])
-        self.assertEqual(len(data['cameras']), 6)
+        self.assertEqual(len(data['cameras']), 7)
         for camera in data['cameras']:
             self.assertTrue(camera['simulated'])
             self.assertIn('not real Tadoba', camera['disclaimer'])
         self.assertTrue(self.client.get('/api/cameras/CAM-01').json()['simulated'])
         self.assertTrue(self.client.get('/api/cameras/C-18').json()['simulated'])
+        self.assertTrue(self.client.get('/api/cameras/C-21').json()['simulated'])
 
     def test_unknown_camera(self):
         self.assertEqual(self.client.get('/api/cameras/missing').status_code, 404)

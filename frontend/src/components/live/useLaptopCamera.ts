@@ -6,8 +6,12 @@ import type { LiveFrameResponse, SessionStatus } from '@/types/api';
 import { message } from '@/lib/utils';
 import { cameraErrorMessage, cameraPermission, errorName, listVideoInputs, openLaptopCamera, validDeviceId, waitForPreview } from './cameraAccess';
 
-const CAMERA_ID = 'C-18';
-export function useLaptopCamera() {
+export function useLiveCamera(
+  cameraId: string = 'C-18',
+  defaultDeviceName: string = 'Laptop Webcam',
+  defaultDeviceType: string = 'laptop_webcam',
+  preferredFacingMode?: 'user' | 'environment',
+) {
   const [running, setRunning] = useState(false), [starting, setStarting] = useState(false), [paused, setPaused] = useState(false);
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>('OFFLINE');
   const [intervalSec, setIntervalSec] = useState(3), [inFlight, setInFlight] = useState(false);
@@ -29,13 +33,13 @@ export function useLaptopCamera() {
     if (videoRef.current) videoRef.current.srcObject = null;
     const old = session.current; session.current = null;
     // Close after a pending heartbeat so that a late heartbeat cannot revive this lease.
-    if (old) void Promise.resolve(heartbeatPending.current).catch(() => {}).then(() => closeCameraSession(CAMERA_ID, old)).catch(() => {});
+    if (old) void Promise.resolve(heartbeatPending.current).catch(() => {}).then(() => closeCameraSession(cameraId, old)).catch(() => {});
     if (mounted.current) {
       setRunning(false); setStarting(false); setPaused(false); setSessionStatus('OFFLINE'); setInFlight(false);
       setDiagnostics(d => ({ ...d, streamActive: false, resolution: '-', sampleStage: 'Stopped', sampleError: '' }));
     }
     // Cancellation settles encoding/transport; old continuations cannot mutate a new generation.
-  }, []);
+  }, [cameraId]);
   const refreshDevices = useCallback(async () => {
     if (!navigator.mediaDevices?.enumerateDevices) return;
     try {
@@ -77,7 +81,7 @@ export function useLaptopCamera() {
           setDiagnostics(d => ({ ...d, attempt }));
           if (attempt.includes('fallback')) setSelectedDevice('');
         }
-      }, abort.signal);
+      }, abort.signal, preferredFacingMode);
       stream.current = opened;
       stage = 'Video playback'; setDiagnostics(d => ({ ...d, stage }));
       if (!videoRef.current) throw new DOMException('Video element unavailable', 'AbortError');
@@ -85,19 +89,19 @@ export function useLaptopCamera() {
       const track = opened.getVideoTracks()[0];
       setDiagnostics(d => ({ ...d, streamActive: opened!.active, deviceLabel: track.label || 'Camera (label unavailable)', resolution: `${videoRef.current!.videoWidth} × ${videoRef.current!.videoHeight}` }));
       stage = 'Backend session registration'; setDiagnostics(d => ({ ...d, stage }));
-      const created = await createCameraSession(CAMERA_ID, { device_name: 'Laptop Webcam', device_type: 'laptop_webcam' });
+      const created = await createCameraSession(cameraId, { device_name: defaultDeviceName, device_type: defaultDeviceType });
       sid = created.session_id;
-      if (abort.signal.aborted) { void closeCameraSession(CAMERA_ID, sid).catch(() => {}); sid = null; abort.signal.throwIfAborted(); }
+      if (abort.signal.aborted) { void closeCameraSession(cameraId, sid).catch(() => {}); sid = null; abort.signal.throwIfAborted(); }
       session.current = sid; active.current = true; pause.current = false;
       track.onended = () => { if (version !== generation.current) return; stopCameraInternal(); if (mounted.current) setError('Camera disconnected. Reconnect it and press Start Camera.'); };
       setSessionStatus(created.status); setRunning(true); setPaused(false);
       setCapturedCount(0); setSubmittedCount(0); setSkippedCount(0); setLastBlobSize(null); setLastLatencyMs(null); setLatestResult(null);
       if (url.current) URL.revokeObjectURL(url.current); url.current = null; setAnalyzedFrameUrl(null);
       setDiagnostics(d => ({ ...d, stage: 'Ready', sampleStage: 'Waiting for video readiness', sampleError: '' })); void refreshDevices();
-      toast.success('Laptop camera C-18 active and session registered.');
+      toast.success(`Camera ${cameraId} active and session registered.`);
     } catch (e) {
       opened?.getTracks().forEach(track => track.stop());
-      if (sid && sid !== session.current) void closeCameraSession(CAMERA_ID, sid).catch(() => {});
+      if (sid && sid !== session.current) void closeCameraSession(cameraId, sid).catch(() => {});
       if (version !== generation.current || !mounted.current) return;
       const text = stage === 'Backend session registration'
         ? `Camera preview opened, but backend session registration failed: ${message(e)}. Confirm the Phase 5A backend is running on port 8000 and restart it after code updates.`
@@ -114,14 +118,14 @@ export function useLaptopCamera() {
     const heartbeat = async () => {
       const sid = session.current;
       if (!sid || heartbeatPending.current || !active.current) return;
-      const promise = sendHeartbeat(CAMERA_ID, sid); heartbeatPending.current = promise;
+      const promise = sendHeartbeat(cameraId, sid); heartbeatPending.current = promise;
       try { const updated = await promise; if (generation.current === version) setSessionStatus(updated.status); }
       catch { if (generation.current === version) setSessionStatus('DEGRADED'); }
       finally { if (heartbeatPending.current === promise) heartbeatPending.current = null; }
     };
     const timer = setInterval(() => void heartbeat(), 10000);
     return () => clearInterval(timer);
-  }, [running]);
+  }, [running, cameraId]);
   useEffect(() => {
     if (!running) return;
     const version = generation.current;
@@ -154,7 +158,7 @@ export function useLaptopCamera() {
         const form = new FormData(); form.append('file', blob, 'webcam_sample.jpg'); form.append('session_id', sid);
         const started = performance.now(); setSubmittedCount(n => n + 1);
         updateStage('Uploading frame');
-        const result = await postCameraFrame(CAMERA_ID, form, {
+        const result = await postCameraFrame(cameraId, form, {
           signal: operation.signal,
           onUploaded: () => updateStage('Waiting for backend inference'),
           onReceiving: () => updateStage('Receiving result'),
@@ -180,9 +184,13 @@ export function useLaptopCamera() {
     };
     const timer = setInterval(() => void sample(), intervalSec * 1000);
     return () => clearInterval(timer);
-  }, [running, intervalSec]);
+  }, [running, intervalSec, cameraId]);
   return { running, starting, paused, sessionStatus, intervalSec, setIntervalSec, inFlight, capturedCount, submittedCount, skippedCount, lastBlobSize, lastLatencyMs,
     latestResult, analyzedFrameUrl, error, videoRef, devices, selectedDevice, setSelectedDevice, diagnostics, refreshDevices, startCamera,
-    stopCamera: () => { stopCameraInternal(); toast.info('Camera stopped. Hardware released; session closure requested.'); },
+    stopCamera: () => { stopCameraInternal(); toast.info(`Camera ${cameraId} stopped. Hardware released; session closure requested.`); },
     togglePause: () => { pause.current = !pause.current; setPaused(pause.current); if (!pause.current) { setError(null); setDiagnostics(d => ({ ...d, sampleStage: 'Waiting for video readiness', sampleError: '' })); } } };
+}
+
+export function useLaptopCamera() {
+  return useLiveCamera('C-18', 'Laptop Webcam', 'laptop_webcam');
 }

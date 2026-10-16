@@ -35,9 +35,9 @@ def create_app(db_path=None, vision_service=None, evidence_dir=None):
 
     app = FastAPI(title='VanaDrishti API', version='0.1.0', lifespan=lifespan)
     app.add_middleware(CORSMiddleware,
-                       allow_origins=[f'http://{host}:{port}' for host in ('localhost', '127.0.0.1')
-                                      for port in (3000, 5173)],
-                       allow_methods=['GET', 'POST', 'DELETE'], allow_headers=['*'])
+                       allow_origin_regex=r"^https?://.*",
+                       allow_origins=['http://localhost:5173', 'http://127.0.0.1:5173'],
+                       allow_methods=['GET', 'POST', 'DELETE', 'OPTIONS'], allow_headers=['*'])
     for module in (health, cameras, analyze, events, alerts, demo, evidence, live):
         app.include_router(module.router)
 

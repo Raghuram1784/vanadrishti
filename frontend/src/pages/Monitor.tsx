@@ -20,9 +20,12 @@ import { DetectionImage } from "@/components/analysis/DetectionImage";
 import { ResultPanels } from "@/components/analysis/ResultPanels";
 import { DemoPanel } from "@/components/demo/DemoPanel";
 import { LiveCameraPanel } from "@/components/live/LiveCameraPanel";
+import { MobileCameraPanel } from "@/components/live/MobileCameraPanel";
+import { CameraGridView } from "@/components/live/CameraGridView";
+import { Layers, Smartphone } from "lucide-react";
 import { message } from "@/lib/utils";
 export default function Monitor() {
-  const [mode, setMode] = useState<"static" | "live">("static");
+  const [mode, setMode] = useState<"grid" | "c18" | "c21" | "static">("grid");
   const cameras = useCameras();
   const [file, setFile] = useState<File>();
   const [preview, setPreview] = useState("");
@@ -108,14 +111,52 @@ export default function Monitor() {
     <>
       <PageTitle
         eyebrow="FOREST INTELLIGENCE / MONITOR"
-        title={mode === "live" ? "Live camera surveillance." : "From a frame to understanding."}
+        title={
+          mode === "grid"
+            ? "Command-center multi-camera surveillance."
+            : mode === "c18"
+            ? "Live Sector C-18 laptop camera node."
+            : mode === "c21"
+            ? "Sector C-21 Android mobile patrol ingestion."
+            : "From a frame to understanding."
+        }
       >
-        {mode === "live"
-          ? "Laptop prototype node C-18. Live sampled frames analyzed with MegaDetector V6 and BioCLIP."
+        {mode === "grid"
+          ? "Six-camera surveillance overview: C-18 and C-21 real physical feeds; peripheral slots clearly marked simulated/inactive. Live inference, risk scoring, and alert routing."
+          : mode === "c18"
+          ? "Sector C-18 prototype node. Live sampled frames analyzed with MegaDetector V6 and BioCLIP."
+          : mode === "c21"
+          ? "Sector C-21 Android field patrol camera ingested via phone hotspot / Wi-Fi into the shared pipeline."
           : "Analyze a wildlife image with the existing detection, species, and risk pipeline."}
       </PageTitle>
 
       <div className="monitor-mode-tabs">
+        <button
+          type="button"
+          className={`mode-tab ${mode === "grid" ? "active" : ""}`}
+          onClick={() => setMode("grid")}
+        >
+          <Layers size={16} />
+          <span>6-CAMERA OVERVIEW</span>
+        </button>
+        <button
+          type="button"
+          className={`mode-tab ${mode === "c18" ? "active" : ""}`}
+          onClick={() => setMode("c18")}
+        >
+          <Camera size={16} />
+          <span>C-18 LAPTOP CAM</span>
+          <span className="live-indicator-dot" />
+        </button>
+        <button
+          type="button"
+          className={`mode-tab ${mode === "c21" ? "active" : ""}`}
+          onClick={() => setMode("c21")}
+        >
+          <Smartphone size={16} />
+          <span>C-21 MOBILE PATROL</span>
+          <span className="live-indicator-dot" />
+        </button>
         <button
           type="button"
           className={`mode-tab ${mode === "static" ? "active" : ""}`}
@@ -124,19 +165,23 @@ export default function Monitor() {
           <ImageIcon size={16} />
           <span>STATIC IMAGE</span>
         </button>
-        <button
-          type="button"
-          className={`mode-tab ${mode === "live" ? "active" : ""}`}
-          onClick={() => setMode("live")}
-        >
-          <Camera size={16} />
-          <span>LIVE FIELD CAMERA</span>
-          <span className="live-indicator-dot" />
-        </button>
       </div>
 
-      {mode === "live" ? (
+      {mode === "grid" ? (
+        <CameraGridView
+          onSelectCamera={(id) => {
+            if (id === "C-18") setMode("c18");
+            else if (id === "C-21") setMode("c21");
+            else {
+              setCamera(id);
+              setMode("static");
+            }
+          }}
+        />
+      ) : mode === "c18" ? (
         <LiveCameraPanel />
+      ) : mode === "c21" ? (
+        <MobileCameraPanel />
       ) : (
         <>
           <div className="demo-flow">1. Select camera <span>→</span> 2. Upload image <span>→</span> 3. Analyze <span>→</span> 4. Detections & species <span>→</span> 5. Context & risk <span>→</span> 6. Stored evidence & alert</div>

@@ -364,10 +364,12 @@ class TestTemporalActivityState(unittest.TestCase):
         self.client.__exit__(None, None, None)
         self.temp.cleanup()
 
-    def upload_frame(self, camera_id='C-18', timestamp=None):
+    def upload_frame(self, camera_id='C-18', timestamp=None, session_id=None):
         data = {}
         if timestamp:
             data['timestamp'] = timestamp
+        if session_id:
+            data['session_id'] = session_id
         return self.client.post(
             f'/api/cameras/{camera_id}/frame',
             data=data,
@@ -538,6 +540,51 @@ class TestTemporalActivityState(unittest.TestCase):
         self.assertEqual(format_detection_count(2), "2 objects detected")
         self.assertEqual(format_detection_count(5), "5 objects detected")
 
+    def test_c21_camera_registered_and_independent_session(self):
+        """10. Verify C-21 camera registration and independent session state from C-18."""
+        # 1. Verify C-21 registration
+        r = self.client.get('/api/cameras/C-21')
+        self.assertEqual(r.status_code, 200, r.text)
+        cam = r.json()
+        self.assertEqual(cam['id'], 'C-21')
+        self.assertEqual(cam['zone'], 'BUFFER')
+
+        # 2. Create C-18 session
+        s18 = self.client.post(
+            '/api/cameras/C-18/session',
+            json={'device_name': 'Laptop Prototype', 'device_type': 'laptop_webcam'},
+        ).json()
+
+        # 3. Create C-21 session
+        s21 = self.client.post(
+            '/api/cameras/C-21/session',
+            json={'device_name': 'Android Mobile Patrol', 'device_type': 'mobile_android'},
+        ).json()
+
+        self.assertNotEqual(s18['session_id'], s21['session_id'])
+        self.assertEqual(s18['camera_id'], 'C-18')
+        self.assertEqual(s21['camera_id'], 'C-21')
+
+        # 4. Upload frame to C-18 only
+        self.vision.detections = [self.detection('person', score=0.92)]
+        t0 = datetime(2026, 10, 16, 12, 0, 0, tzinfo=LOCAL_TZ)
+        r_c18 = self.upload_frame(camera_id='C-18', session_id=s18['session_id'], timestamp=t0.isoformat())
+        self.assertEqual(r_c18.status_code, 200)
+
+        # Check session counters: C-18 has 1 frame, C-21 has 0
+        cur_s18 = self.client.get('/api/cameras/C-18/session').json()
+        cur_s21 = self.client.get('/api/cameras/C-21/session').json()
+        self.assertEqual(cur_s18['frames_received'], 1)
+        self.assertEqual(cur_s21['frames_received'], 0)
+
+        # 5. Upload frame to C-21
+        t1 = t0 + timedelta(seconds=2)
+        r_c21 = self.upload_frame(camera_id='C-21', session_id=s21['session_id'], timestamp=t1.isoformat())
+        self.assertEqual(r_c21.status_code, 200)
+        cur_s21_after = self.client.get('/api/cameras/C-21/session').json()
+        self.assertEqual(cur_s21_after['frames_received'], 1)
+
 
 if __name__ == '__main__':
     unittest.main()
+

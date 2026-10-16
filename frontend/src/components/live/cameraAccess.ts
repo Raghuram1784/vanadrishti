@@ -34,6 +34,7 @@ export async function openLaptopCamera(
   selected: string,
   attempt: (description: string) => void,
   signal: AbortSignal,
+  preferredFacingMode?: 'user' | 'environment',
 ) {
   const open = async (video: boolean | MediaTrackConstraints) => {
     signal.throwIfAborted();
@@ -50,6 +51,15 @@ export async function openLaptopCamera(
     catch (error) {
       if (signal.aborted || !['NotFoundError', 'OverconstrainedError'].includes(errorName(error))) throw error;
       attempt(`Selected camera unavailable (${errorName(error)}); fallback: video=true; audio disabled`);
+      return open(preferredFacingMode ? { facingMode: { ideal: preferredFacingMode } } : true);
+    }
+  }
+  if (preferredFacingMode) {
+    attempt(`Camera facing: ${preferredFacingMode}; audio disabled`);
+    try {
+      return await open({ facingMode: { ideal: preferredFacingMode } });
+    } catch {
+      attempt('Facing mode unavailable; fallback: video=true; audio disabled');
       return open(true);
     }
   }

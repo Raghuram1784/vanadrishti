@@ -5,10 +5,12 @@ import Dashboard from "@/pages/Dashboard";
 import Monitor from "@/pages/Monitor";
 import Alerts from "@/pages/Alerts";
 import Events from "@/pages/Events";
+import MobilePatrolStandalone from "@/pages/MobilePatrolStandalone";
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="c21" element={<MobilePatrolStandalone />} />
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="monitor" element={<Monitor />} />
