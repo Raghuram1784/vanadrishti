@@ -38,7 +38,24 @@ export function useLiveUpdates() {
           if (message.type === 'alert.created' && !seenAlerts.has(message.data.id)) {
             seenAlerts.add(message.data.id);
             if (seenAlerts.size > 200) seenAlerts.delete(seenAlerts.values().next().value!);
-            toast.info(`New ${message.data.risk_level} wildlife-security event received${message.data.source === 'demo' ? ' · Simulated scenario' : ''}`);
+            const alert = message.data;
+            const policyText = alert.policy ? ` [${alert.policy} ZONE]` : '';
+            const reasonText = alert.reasons?.[0] || 'Attention required';
+            const timeStr = new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            toast(
+              `Ranger Alert: ${alert.camera_id} · ${alert.risk_level} Risk${policyText}`,
+              {
+                description: `${reasonText} · ${timeStr} IST`,
+                action: {
+                  label: 'Review',
+                  onClick: () => {
+                    if (typeof window !== 'undefined') window.location.href = '/alerts';
+                  },
+                },
+                duration: 8000,
+              }
+            );
           }
         } catch { /* Ignore malformed notifications; REST polling remains active. */ }
       };

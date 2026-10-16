@@ -23,9 +23,12 @@ def local_timestamp(value=None):
     return value.astimezone(LOCAL_TZ)
 
 
-def camera_payload(camera):
-    return {**camera.to_dict(), 'id': camera.camera_id, 'zone': camera.zone_type,
-            'simulated': True, 'disclaimer': DISCLAIMER}
+def camera_payload(camera, policy=None):
+    payload = {**camera.to_dict(), 'id': camera.camera_id, 'zone': camera.zone_type,
+               'simulated': True, 'disclaimer': DISCLAIMER}
+    if policy:
+        payload['policy'] = policy
+    return payload
 
 
 class ContextService:
@@ -45,10 +48,12 @@ class ContextService:
             raise KeyError(camera_id)
         return camera
 
-    def _assess(self, context, detections, camera_id, timestamp, authorized_patrol, source):
+    def _assess(self, context, detections, camera_id, timestamp, authorized_patrol, source, policy=None):
         camera = context.cameras.get(camera_id)
         if camera is None:
             raise KeyError(camera_id)
+        if policy is None and hasattr(self, 'repository') and self.repository:
+            policy = self.repository.get_camera_policy(camera_id)
         # Explicit false must override registry authorization as well as true.
         if authorized_patrol is not None:
             camera = replace(camera, patrol_authorized=authorized_patrol)
@@ -76,33 +81,35 @@ class ContextService:
                 top_species_candidates=species.get('top3'), zone_type=camera.zone_type,
                 patrol_authorized=camera.patrol_authorized)
             isolated = ContextEngine(camera_registry=context.cameras, event_store=deepcopy(context.events))
-            risks.append(RiskService(isolated).evaluate(event, camera))
+            risks.append(RiskService(isolated).evaluate(event, camera, zone_policy=policy))
             domain.append(event)
         for event in domain:
             context.events.add_event(event)
         risk = max(risks, key=lambda r: r['score']) if risks else RiskService(context).empty()
         response = {'event_id': event_id, 'timestamp': timestamp.isoformat(),
-                    'simulated': True, 'source': source, 'camera': camera_payload(camera),
+                    'simulated': True, 'source': source,
+                    'camera': camera_payload(camera, policy=policy),
+                    'policy': policy,
                     'detections': detections,
-                    'context': {'zone': camera.zone_type, 'hour': timestamp.hour,
+                    'context': {'zone': camera.zone_type, 'policy': policy, 'hour': timestamp.hour,
                                 'timezone': 'Asia/Kolkata', 'simulated': True,
                                 'authorized_patrol': camera.patrol_authorized,
                                 'recent_wildlife_events': wildlife}, 'risk': risk}
         return response, [event.to_dict() for event in domain]
 
-    def assess_only(self, detections, camera_id, timestamp=None, authorized_patrol=None, source='live_camera'):
+    def assess_only(self, detections, camera_id, timestamp=None, authorized_patrol=None, source='live_camera', policy=None):
         """Assess detections against current context without persisting to DB or evidence store."""
         with self.lock:
             context = ContextEngine(camera_registry=self.context.cameras,
                                     event_store=deepcopy(self.context.events))
-            entry, _ = self._assess(context, detections, camera_id, timestamp, authorized_patrol, source)
+            entry, _ = self._assess(context, detections, camera_id, timestamp, authorized_patrol, source, policy=policy)
             return entry
 
-    def analyze(self, detections, camera_id, timestamp, authorized_patrol, evidence_bytes=None, source='image'):
+    def analyze(self, detections, camera_id, timestamp, authorized_patrol, evidence_bytes=None, source='image', policy=None):
         with self.lock:
             context = ContextEngine(camera_registry=self.context.cameras,
                                     event_store=deepcopy(self.context.events))
-            entry = self._assess(context, detections, camera_id, timestamp, authorized_patrol, source)
+            entry = self._assess(context, detections, camera_id, timestamp, authorized_patrol, source, policy=policy)
             metadata = None
             try:
                 if evidence_bytes is not None and self.evidence_store is not None:

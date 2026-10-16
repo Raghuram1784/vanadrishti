@@ -106,8 +106,16 @@ export function AlertDrawer({
                 </div>
                 <div>
                   <dt>Camera</dt>
-                  <dd>{alert.camera_id} · Simulated location</dd>
+                  <dd>
+                    {alert.camera_id} · {alert.camera_id.startsWith("C-") ? "Real hardware node" : "Simulated location"}
+                  </dd>
                 </div>
+                {alert.policy && (
+                  <div>
+                    <dt>Alert Policy</dt>
+                    <dd className="font-mono text-amber-300 font-semibold">{alert.policy} ZONE</dd>
+                  </div>
+                )}
                 <div>
                   <dt>Timestamp · IST</dt>
                   <dd>{dateTime(alert.timestamp)}</dd>
@@ -152,28 +160,43 @@ export function AlertDrawer({
                 </>
               )}
               <div className="alert-actions">
-                <h3>Update review status</h3>
+                <h3>Ranger Incident Response</h3>
                 <p>
-                  Records a prototype status change. No patrol is dispatched.
+                  Update workflow status. Every action is logged with timestamp for accountability.
                 </p>
-                <div>
+                <div className="flex flex-wrap gap-2">
                   {transitions[alert.status].length ? (
-                    transitions[alert.status].map((action) => (
-                      <Button
-                        key={action}
-                        variant={action === "REVIEWING" ? "default" : "outline"}
-                        disabled={busy}
-                        onClick={() =>
-                          ["FALSE_ALARM", "RESOLVED"].includes(action)
-                            ? setPending(action)
-                            : void act(action)
-                        }
-                      >
-                        {statusLabel(action)}
-                      </Button>
-                    ))
+                    transitions[alert.status].map((action) => {
+                      const label =
+                        action === "REVIEWING"
+                          ? "Acknowledge"
+                          : action === "PATROL_ASSIGNED"
+                          ? "Investigate / Patrol"
+                          : action === "RESOLVED"
+                          ? "Resolve"
+                          : action === "FALSE_ALARM"
+                          ? "False Alarm"
+                          : action === "ESCALATED"
+                          ? "Escalate"
+                          : statusLabel(action);
+
+                      return (
+                        <Button
+                          key={action}
+                          variant={action === "REVIEWING" ? "default" : action === "RESOLVED" ? "secondary" : "outline"}
+                          disabled={busy}
+                          onClick={() =>
+                            ["FALSE_ALARM", "RESOLVED"].includes(action)
+                              ? setPending(action)
+                              : void act(action)
+                          }
+                        >
+                          {label}
+                        </Button>
+                      );
+                    })
                   ) : (
-                    <p>This alert is closed.</p>
+                    <p className="text-sm text-slate-400">This incident is resolved / closed.</p>
                   )}
                 </div>
               </div>

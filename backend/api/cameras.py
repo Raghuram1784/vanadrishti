@@ -10,6 +10,8 @@ from backend.schemas.api import (
     HeartbeatRequest,
     CameraSessionResponse,
     LiveFrameResponse,
+    CameraPolicyRequest,
+    CameraPolicyResponse,
 )
 
 router = APIRouter(tags=['cameras'])
@@ -17,8 +19,12 @@ router = APIRouter(tags=['cameras'])
 
 @router.get('/api/cameras')
 def cameras(request: Request):
-    return {'simulated': True, 'disclaimer': DISCLAIMER,
-            'cameras': [camera_payload(c) for c in request.app.state.context.context.cameras.list_all()]}
+    repo = getattr(request.app.state, 'repository', None)
+    cams = []
+    for c in request.app.state.context.context.cameras.list_all():
+        pol = repo.get_camera_policy(c.camera_id) if repo else 'RESTRICTED'
+        cams.append(camera_payload(c, policy=pol))
+    return {'simulated': True, 'disclaimer': DISCLAIMER, 'cameras': cams}
 
 
 @router.get('/api/camera-sessions', response_model=list[CameraSessionResponse])
@@ -141,6 +147,9 @@ def live_frame(
         sample_classes = {d['type'] for d in detections if d.get('type')}
         sessions.record_sample_classes(camera_id, sample_classes)
 
+    repo = getattr(request.app.state, 'repository', None)
+    policy = repo.get_camera_policy(camera_id) if repo else 'RESTRICTED'
+
     # 1. NO DETECTION / UNCERTAIN DETECTION: Return analysis without persisting event or evidence
     confirmed = [d for d in detections if not d.get('uncertain')]
     if not confirmed:
@@ -162,10 +171,12 @@ def live_frame(
             timestamp=ts.isoformat(),
             simulated=True,
             camera_id=camera_id,
-            camera=camera_payload(camera),
+            camera=camera_payload(camera, policy=policy),
+            policy=policy,
             detections=detections,
             context={
                 'zone': camera.zone_type,
+                'policy': policy,
                 'hour': ts.hour,
                 'timezone': 'Asia/Kolkata',
                 'simulated': True,
@@ -196,7 +207,7 @@ def live_frame(
     if is_continuation and existing_event_id:
         # CONTINUATION: Evaluate context/risk for display only; do NOT persist new event or alert
         assessment = request.app.state.context.assess_only(
-            detections, camera_id, ts, authorized_patrol, source='live_camera'
+            detections, camera_id, ts, authorized_patrol, source='live_camera', policy=policy
         )
         recent_activity = sessions.record_confirmed_activity(
             camera_id=camera_id,
@@ -219,6 +230,7 @@ def live_frame(
             simulated=True,
             camera_id=camera_id,
             camera=assessment['camera'],
+            policy=policy,
             detections=assessment['detections'],
             context=assessment['context'],
             risk=assessment['risk'],
@@ -229,7 +241,7 @@ def live_frame(
 
     # 3. NEW MEANINGFUL ACTIVITY: Persist event and evidence, notify WebSockets if alert
     entry = request.app.state.context.analyze(
-        detections, camera_id, ts, authorized_patrol, evidence_bytes=raw_bytes, source='live_camera'
+        detections, camera_id, ts, authorized_patrol, evidence_bytes=raw_bytes, source='live_camera', policy=policy
     )
     if sessions and primary_category:
         sessions.record_new_event(
@@ -261,6 +273,7 @@ def live_frame(
         simulated=True,
         camera_id=camera_id,
         camera=entry['camera'],
+        policy=policy,
         detections=entry['detections'],
         context=entry['context'],
         risk=entry['risk'],
@@ -273,6 +286,36 @@ def live_frame(
 @router.get('/api/cameras/{camera_id}')
 def camera(camera_id: str, request: Request):
     try:
-        return camera_payload(request.app.state.context.camera(camera_id))
+        c = request.app.state.context.camera(camera_id)
+        repo = getattr(request.app.state, 'repository', None)
+        pol = repo.get_camera_policy(camera_id) if repo else 'RESTRICTED'
+        return camera_payload(c, policy=pol)
     except KeyError:
         raise HTTPException(404, 'Unknown camera') from None
+
+
+@router.get('/api/cameras/{camera_id}/policy', response_model=CameraPolicyResponse)
+def get_camera_policy(camera_id: str, request: Request):
+    try:
+        request.app.state.context.camera(camera_id)
+    except KeyError:
+        raise HTTPException(404, 'Unknown camera') from None
+    repo = getattr(request.app.state, 'repository', None)
+    pol = repo.get_camera_policy(camera_id) if repo else 'RESTRICTED'
+    return {'camera_id': camera_id, 'policy': pol, 'status': 'ok'}
+
+
+@router.post('/api/cameras/{camera_id}/policy', response_model=CameraPolicyResponse)
+def set_camera_policy(camera_id: str, body: CameraPolicyRequest, request: Request):
+    try:
+        request.app.state.context.camera(camera_id)
+    except KeyError:
+        raise HTTPException(404, 'Unknown camera') from None
+    repo = getattr(request.app.state, 'repository', None)
+    if not repo:
+        raise HTTPException(500, 'Repository unavailable')
+    try:
+        updated = repo.set_camera_policy(camera_id, body.policy)
+    except ValueError as err:
+        raise HTTPException(422, str(err)) from None
+    return {'camera_id': camera_id, 'policy': updated, 'status': 'ok'}

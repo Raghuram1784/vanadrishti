@@ -29,6 +29,7 @@ class AnalysisResponse(BaseModel):
     evidence_image_path: str | None = None
     evidence_image_url: str | None = None
     evidence_media_type: str | None = None
+    policy: str | None = None
 
 
 class AlertAction(BaseModel):
@@ -46,6 +47,17 @@ class AlertResponse(BaseModel):
     status: AlertStatus
     source: Literal['image', 'demo', 'live_camera'] | None = None
     evidence_image_url: str | None = None
+    policy: str | None = None
+
+
+class CameraPolicyRequest(BaseModel):
+    policy: str
+
+
+class CameraPolicyResponse(BaseModel):
+    camera_id: str
+    policy: str
+    status: str = 'ok'
 
 
 EventState = Literal['NEW', 'CONTINUATION', 'NO_DETECTION', 'UNCERTAIN_DETECTION']
@@ -102,3 +114,4 @@ class LiveFrameResponse(BaseModel):
     evidence_image_url: str | None = None
     session_id: str | None = None
     recent_activity: RecentActivity | None = None
+    policy: str | None = None

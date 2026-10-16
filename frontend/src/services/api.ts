@@ -4,6 +4,7 @@ import type {
   AlertStatus,
   AnalyzeImageResponse,
   Camera,
+  CameraPolicy,
   CameraSession,
   DemoScenario,
   Event,
@@ -136,3 +137,18 @@ export const getCameraSessions = () =>
 
 export const postCameraFrame = (cameraId: string, form: FormData, options?: FrameRequestOptions) =>
   uploadCameraFrame(`${BASE}/api/cameras/${encodeURIComponent(cameraId)}/frame`, form, options);
+
+export const getCameraPolicy = (cameraId: string) =>
+  request<{ camera_id: string; policy: CameraPolicy }>(
+    `/api/cameras/${encodeURIComponent(cameraId)}/policy`
+  );
+
+export const setCameraPolicy = (cameraId: string, policy: CameraPolicy) =>
+  request<{ camera_id: string; policy: CameraPolicy; updated_at: string }>(
+    `/api/cameras/${encodeURIComponent(cameraId)}/policy`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ policy }),
+    }
+  );

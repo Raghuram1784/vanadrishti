@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
   Activity,
@@ -8,13 +9,36 @@ import {
   ScanLine,
   Trees,
 } from "lucide-react";
-import { getHealth } from "@/services/api";
+import { getAlerts, getHealth } from "@/services/api";
 import { usePolling } from "@/hooks/usePolling";
 import { useLiveUpdates } from '@/hooks/useLiveUpdates';
+import type { LiveMessage } from "@/types/api";
+
 export function Layout() {
   const live = useLiveUpdates();
   const health = usePolling(getHealth, 10000);
   const online = !!health.data && !health.error;
+  const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
+
+  useEffect(() => {
+    getAlerts().then((alerts) => {
+      setUnreadAlerts(alerts.filter((a) => a.status === "NEW" || a.status === "REVIEWING").length);
+    }).catch(() => {});
+
+    const handler = (event: globalThis.Event) => {
+      const message = (event as CustomEvent<LiveMessage>).detail;
+      if (message.type === "alert.created") {
+        setUnreadAlerts((n) => n + 1);
+      } else if (message.type === "alert.updated") {
+        getAlerts().then((alerts) => {
+          setUnreadAlerts(alerts.filter((a) => a.status === "NEW" || a.status === "REVIEWING").length);
+        }).catch(() => {});
+      }
+    };
+    window.addEventListener("vanadrishti:live", handler);
+    return () => window.removeEventListener("vanadrishti:live", handler);
+  }, []);
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -44,6 +68,23 @@ export function Layout() {
               >
                 <I size={18} />
                 <span>{String(label)}</span>
+                {path === "/alerts" && unreadAlerts > 0 && (
+                  <span
+                    title={`${unreadAlerts} alerts requiring ranger review`}
+                    style={{
+                      marginLeft: "auto",
+                      marginRight: "6px",
+                      padding: "1px 6px",
+                      borderRadius: "9999px",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      backgroundColor: "#ef4444",
+                      color: "#ffffff",
+                    }}
+                  >
+                    {unreadAlerts}
+                  </span>
+                )}
                 <ArrowUpRight size={14} className="nav-arrow" />
               </NavLink>
             );

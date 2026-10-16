@@ -1,5 +1,6 @@
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export type ObjectType = "animal" | "person" | "vehicle";
+export type CameraPolicy = "SAFE" | "RESTRICTED" | "CRITICAL";
 export type AlertStatus =
   | "NEW"
   | "REVIEWING"
@@ -25,6 +26,7 @@ export interface Camera {
   active: boolean;
   allowed_hours: { start: string; end: string } | null;
   patrol_authorized: boolean;
+  policy?: CameraPolicy;
   simulated: true;
   disclaimer: string;
   notes: string | null;
@@ -78,6 +80,7 @@ export interface Event {
   detections: Detection[];
   context: Context;
   risk: RiskAssessment;
+  policy?: CameraPolicy;
 }
 export type AnalyzeImageResponse = Event;
 export interface Alert {
@@ -91,6 +94,7 @@ export interface Alert {
   risk_level: RiskLevel;
   reasons: string[];
   status: AlertStatus;
+  policy?: CameraPolicy;
 }
 export interface DemoScenario {
   scenario_id: string;
@@ -161,5 +165,6 @@ export interface LiveFrameResponse {
   evidence_image_url: string | null;
   session_id: string | null;
   recent_activity?: RecentActivity | null;
+  policy?: CameraPolicy;
 }
 

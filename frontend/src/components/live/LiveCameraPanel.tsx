@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { UncertaintyNotice, detectionLabel } from "@/components/analysis/UncertaintyNotice";
 import { Camera, Play, Square, Pause, Activity, Layers, ShieldAlert, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,9 @@ import { DetectionImage } from "@/components/analysis/DetectionImage";
 import { ResultPanels } from "@/components/analysis/ResultPanels";
 import { useLaptopCamera } from "./useLaptopCamera";
 import { frameQualityNotice } from "./frameQuality";
+import { getCameraPolicy, setCameraPolicy } from "@/services/api";
+import type { CameraPolicy } from "@/types/api";
+import { toast } from "sonner";
 
 const CAMERA_ID = "C-18";
 const CAMERA_NAME = "Sector C-18 Trail Camera — Laptop Prototype Node";
@@ -18,6 +22,25 @@ export function LiveCameraPanel() {
     setSelectedDevice, diagnostics, refreshDevices, startCamera, stopCamera, togglePause,
   } = useLaptopCamera();
   const qualityNotice = latestResult ? frameQualityNotice(latestResult.frame_analysis) : null;
+  const [policy, setPolicy] = useState<CameraPolicy>("CRITICAL");
+
+  useEffect(() => {
+    getCameraPolicy(CAMERA_ID)
+      .then((res) => {
+        if (res?.policy) setPolicy(res.policy);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handlePolicyChange = async (newPolicy: CameraPolicy) => {
+    try {
+      await setCameraPolicy(CAMERA_ID, newPolicy);
+      setPolicy(newPolicy);
+      toast.success(`${CAMERA_ID} operational policy updated to ${newPolicy}`);
+    } catch {
+      toast.error(`Failed to update ${CAMERA_ID} policy`);
+    }
+  };
 
   return (
     <div className="live-camera-layout">
@@ -30,9 +53,35 @@ export function LiveCameraPanel() {
           </div>
           <div>
             <h3>{CAMERA_NAME}</h3>
-            <span className="live-camera-meta">
-              Simulated Zone: <strong className="zone-tag">{ZONE_TYPE}</strong> · Demonstration Node
-            </span>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <span className="live-camera-meta">
+                Geographic Zone: <strong className="zone-tag">{ZONE_TYPE}</strong> · Demonstration Node
+              </span>
+              <span className="text-slate-600">|</span>
+              <label className="flex items-center gap-1.5 text-xs text-slate-300">
+                <ShieldAlert
+                  size={13}
+                  className={
+                    policy === "CRITICAL"
+                      ? "text-red-400"
+                      : policy === "RESTRICTED"
+                      ? "text-amber-400"
+                      : "text-emerald-400"
+                  }
+                />
+                <span className="font-medium text-slate-300">Alert Policy:</span>
+                <select
+                  aria-label={`${CAMERA_ID} operational policy`}
+                  value={policy}
+                  onChange={(e) => handlePolicyChange(e.target.value as CameraPolicy)}
+                  className="bg-slate-900 border border-slate-700 hover:border-slate-600 text-xs font-mono text-slate-200 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                >
+                  <option value="SAFE">SAFE / PUBLIC</option>
+                  <option value="RESTRICTED">RESTRICTED</option>
+                  <option value="CRITICAL">CRITICAL / SENSITIVE</option>
+                </select>
+              </label>
+            </div>
           </div>
         </div>
 

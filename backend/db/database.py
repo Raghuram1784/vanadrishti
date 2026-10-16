@@ -1,4 +1,4 @@
-"""SQLite JSON repository alongside, not replacing, the Phase 3 EventStore."""
+from datetime import datetime, timezone
 import json
 import sqlite3
 import logging
@@ -18,6 +18,8 @@ class Repository:
                 source TEXT NOT NULL, payload TEXT NOT NULL, domain_events TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS alerts (
                 id TEXT PRIMARY KEY, status TEXT NOT NULL, payload TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS camera_policies (
+                camera_id TEXT PRIMARY KEY, policy TEXT NOT NULL);
         ''')
 
     def close(self):
@@ -39,11 +41,15 @@ class Repository:
                 messages.append({'type': 'event.created', 'data': response})
                 risk = response['risk']
                 if risk['alert']:
+                    policy = response.get('policy') or response.get('camera', {}).get('policy')
+                    if not policy:
+                        policy = self.get_camera_policy(response['camera']['id'])
                     alert = {'id': response['event_id'], 'timestamp': response['timestamp'],
                              'camera_id': response['camera']['id'], 'simulated': True,
                              'risk_score': risk['score'], 'risk_level': risk['level'],
                              'reasons': risk['reasons'], 'status': 'NEW',
                              'source': response['source'],
+                             'policy': policy,
                              'evidence_image_url': response.get('evidence_image_url')}
                     self.connection.execute('INSERT INTO alerts VALUES (?,?,?)',
                                             (alert['id'], 'NEW', json.dumps(alert)))
@@ -97,8 +103,42 @@ class Repository:
             if action != alert['status'] and action not in TRANSITIONS[alert['status']]:
                 raise ValueError('Invalid alert status transition')
             alert['status'] = action
+            alert['updated_at'] = datetime.now(timezone.utc).isoformat()
             self.connection.execute('UPDATE alerts SET status=?, payload=? WHERE id=?',
                                     (action, json.dumps(alert), alert_id))
         if previous_status != action:
             self._notify([{'type': 'alert.updated', 'data': alert}])
         return alert
+
+    def get_camera_policy(self, camera_id: str) -> str | None:
+        with self.lock:
+            row = self.connection.execute(
+                'SELECT policy FROM camera_policies WHERE camera_id=?', (camera_id,)
+            ).fetchone()
+        if row and row[0]:
+            return row[0]
+        # Real cameras have default operational alert policies
+        if camera_id == 'C-18':
+            return 'CRITICAL'
+        elif camera_id == 'C-21':
+            return 'RESTRICTED'
+        return None
+
+    def set_camera_policy(self, camera_id: str, policy: str) -> str:
+        policy_upper = (policy or '').strip().upper()
+        if policy_upper not in ('SAFE', 'RESTRICTED', 'CRITICAL'):
+            raise ValueError(f"Invalid policy '{policy}'. Must be one of SAFE, RESTRICTED, CRITICAL")
+        with self.lock, self.connection:
+            self.connection.execute(
+                'INSERT OR REPLACE INTO camera_policies (camera_id, policy) VALUES (?, ?)',
+                (camera_id, policy_upper),
+            )
+        return policy_upper
+
+    def get_all_camera_policies(self) -> dict[str, str]:
+        with self.lock:
+            rows = self.connection.execute('SELECT camera_id, policy FROM camera_policies').fetchall()
+        result = {'C-18': 'CRITICAL', 'C-21': 'RESTRICTED'}
+        for cid, pol in rows:
+            result[cid] = pol
+        return result

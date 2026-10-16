@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useCameras } from "@/hooks/useCameras";
-import { getCameraSessions, getEvents } from "@/services/api";
-import type { CameraSession, Event } from "@/types/api";
+import { getCameraSessions, getEvents, getCameraPolicy, setCameraPolicy } from "@/services/api";
+import type { CameraPolicy, CameraSession, Event } from "@/types/api";
+import { toast } from "sonner";
+import { dateTime } from "@/lib/utils";
 import {
   Camera,
   Smartphone,
@@ -15,17 +17,24 @@ import {
   MapPin,
   Clock,
   Layers,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CameraGridViewProps {
   onSelectCamera: (cameraId: string) => void;
+  initialSessions?: CameraSession[];
+  initialEvents?: Event[];
 }
 
-export function CameraGridView({ onSelectCamera }: CameraGridViewProps) {
+export function CameraGridView({ onSelectCamera, initialSessions, initialEvents }: CameraGridViewProps) {
   const cameraData = useCameras();
-  const [sessions, setSessions] = useState<CameraSession[]>([]);
-  const [recentEvents, setRecentEvents] = useState<Event[]>([]);
+  const [sessions, setSessions] = useState<CameraSession[]>(initialSessions || []);
+  const [recentEvents, setRecentEvents] = useState<Event[]>(initialEvents || []);
+  const [policies, setPolicies] = useState<Record<string, CameraPolicy>>({
+    "C-18": "CRITICAL",
+    "C-21": "RESTRICTED",
+  });
 
   useEffect(() => {
     const fetchStatus = () => {
@@ -33,9 +42,27 @@ export function CameraGridView({ onSelectCamera }: CameraGridViewProps) {
       getEvents().then((evts) => setRecentEvents(evts.slice(0, 10))).catch(() => {});
     };
     fetchStatus();
+    // Load persisted policies for physical cameras
+    getCameraPolicy("C-18").then((res) => {
+      if (res?.policy) setPolicies((p) => ({ ...p, "C-18": res.policy }));
+    }).catch(() => {});
+    getCameraPolicy("C-21").then((res) => {
+      if (res?.policy) setPolicies((p) => ({ ...p, "C-21": res.policy }));
+    }).catch(() => {});
+
     const timer = setInterval(fetchStatus, 4000);
     return () => clearInterval(timer);
   }, []);
+
+  const handlePolicyChange = async (cameraId: string, newPolicy: CameraPolicy) => {
+    try {
+      await setCameraPolicy(cameraId, newPolicy);
+      setPolicies((prev) => ({ ...prev, [cameraId]: newPolicy }));
+      toast.success(`${cameraId} operational policy updated to ${newPolicy}`);
+    } catch {
+      toast.error(`Failed to update ${cameraId} policy`);
+    }
+  };
 
   const getSession = (id: string) => sessions.find((s) => s.camera_id === id);
   const getLatestEvent = (id: string) => recentEvents.find((e) => e.camera?.id === id);
@@ -191,6 +218,43 @@ export function CameraGridView({ onSelectCamera }: CameraGridViewProps) {
                     <span>{slot.location}</span>
                   </span>
                 </div>
+
+                {/* Operational Zone Policy Dropdown for Real Cameras */}
+                {isReal ? (
+                  <div className="flex items-center justify-between pt-1.5 border-t border-slate-800/60 text-xs">
+                    <span className="text-[11px] text-slate-300 flex items-center gap-1">
+                      <ShieldAlert
+                        size={12}
+                        className={
+                          policies[slot.id] === "CRITICAL"
+                            ? "text-red-400"
+                            : policies[slot.id] === "RESTRICTED"
+                            ? "text-amber-400"
+                            : "text-emerald-400"
+                        }
+                      />
+                      <span>Alert Policy:</span>
+                    </span>
+                    <select
+                      aria-label={`${slot.id} operational policy`}
+                      value={policies[slot.id] || (slot.id === "C-18" ? "CRITICAL" : "RESTRICTED")}
+                      onChange={(e) => handlePolicyChange(slot.id, e.target.value as CameraPolicy)}
+                      className="bg-slate-900 border border-slate-700 hover:border-slate-600 text-[11px] font-mono text-slate-200 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                    >
+                      <option value="SAFE">SAFE / PUBLIC</option>
+                      <option value="RESTRICTED">RESTRICTED</option>
+                      <option value="CRITICAL">CRITICAL / SENSITIVE</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-800/40 text-[11px] text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <Radio size={11} className="text-slate-600" />
+                      <span>Mode:</span>
+                    </span>
+                    <span className="font-mono text-[10px] text-slate-500">SYNTHETIC BENCHMARK</span>
+                  </div>
+                )}
               </div>
 
               {/* Viewport Frame */}
@@ -210,7 +274,7 @@ export function CameraGridView({ onSelectCamera }: CameraGridViewProps) {
                         <Smartphone size={32} className="mx-auto text-slate-600" />
                       )}
                       <p className="text-xs text-slate-400 font-mono">
-                        {isOnline ? "Sampling Active · Awaiting Detections" : "Source Standby · Click to Configure"}
+                        {isOnline ? "Sampling Active · Awaiting Detections" : "Source Standby · Offline"}
                       </p>
                       <Button
                         size="sm"
@@ -236,34 +300,92 @@ export function CameraGridView({ onSelectCamera }: CameraGridViewProps) {
                 )}
 
                 {/* Overlay Badge for Real Node */}
-                {isReal && isOnline && (
-                  <div className="absolute top-2 left-2 bg-slate-950/80 backdrop-blur px-2 py-0.5 rounded text-[10px] font-mono text-emerald-400 border border-slate-700 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>HARDWARE ONLINE</span>
+                {isReal && (
+                  <div className="absolute top-2 left-2 bg-slate-950/80 backdrop-blur px-2 py-0.5 rounded text-[10px] font-mono border border-slate-700 flex items-center gap-1">
+                    {isOnline ? (
+                      <>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-emerald-400">HARDWARE ONLINE</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                        <span className="text-slate-400">HARDWARE OFFLINE</span>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Card Footer: Telemetry & Actions */}
-              <div className="p-3.5 bg-slate-900/40 space-y-2.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400 text-[11px]">Latest Intelligence:</span>
-                  {lastEvent && lastEvent.risk ? (
-                    <span
-                      className={`font-semibold text-xs ${
-                        lastEvent.risk.level === "CRITICAL"
-                          ? "text-red-400"
-                          : lastEvent.risk.level === "HIGH"
-                          ? "text-amber-400"
-                          : "text-emerald-400"
-                      }`}
-                    >
-                      {lastEvent.risk.level} ({lastEvent.risk.score})
-                    </span>
+              {/* Card Footer: Telemetry & Actions distinguishing Live vs Historical */}
+              <div className="p-3.5 bg-slate-900/40 space-y-2">
+                {isReal ? (
+                  isOnline ? (
+                    <div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-emerald-400 text-[11px] font-semibold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                          Live Stream Status:
+                        </span>
+                        {lastEvent?.risk ? (
+                          <span
+                            className={`font-semibold text-xs ${
+                              lastEvent.risk.level === "CRITICAL"
+                                ? "text-red-400"
+                                : lastEvent.risk.level === "HIGH"
+                                ? "text-amber-400"
+                                : "text-emerald-400"
+                            }`}
+                          >
+                            Current Risk: {lastEvent.risk.level} ({lastEvent.risk.score})
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-[11px] font-mono">Stream Active · Normal</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                        Sampling active · Continuous ingestion
+                      </p>
+                    </div>
                   ) : (
-                    <span className="text-slate-500 text-[11px] font-mono">No recent incidents</span>
-                  )}
-                </div>
+                    <div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400 text-[11px] flex items-center gap-1">
+                          <History size={11} className="text-slate-500" />
+                          Last Recorded Event:
+                        </span>
+                        {lastEvent?.risk ? (
+                          <span
+                            className={`font-semibold text-xs ${
+                              lastEvent.risk.level === "CRITICAL"
+                                ? "text-red-400"
+                                : lastEvent.risk.level === "HIGH"
+                                ? "text-amber-400"
+                                : "text-emerald-400"
+                            }`}
+                          >
+                            {lastEvent.risk.level} ({lastEvent.risk.score})
+                          </span>
+                        ) : (
+                          <span className="text-slate-500 text-[11px] font-mono">No historical records</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-amber-500/80 font-mono mt-0.5">
+                        {lastEvent ? `Event at ${dateTime(lastEvent.timestamp)} · Camera offline` : "Camera offline / standby"}
+                      </p>
+                    </div>
+                  )
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500 text-[11px]">Sector Status:</span>
+                      <span className="text-slate-500 text-[11px] font-mono">Synthetic Reference</span>
+                    </div>
+                    <p className="text-[10px] text-slate-600 font-mono mt-0.5">
+                      Inactive corridor · Static baseline
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
                   <span className="text-[10px] text-slate-500 font-mono">

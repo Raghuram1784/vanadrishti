@@ -11,13 +11,16 @@ import {
   RefreshCw,
   Smartphone,
   ShieldCheck,
+  ShieldAlert,
   AlertTriangle,
   Wifi,
   Info,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { BASE } from "@/services/api";
+import { BASE, getCameraPolicy, setCameraPolicy } from "@/services/api";
+import type { CameraPolicy } from "@/types/api";
+import { toast } from "sonner";
 
 const DEMO_TOKEN = "RANGER-DEMO-2026";
 
@@ -27,12 +30,31 @@ export function MobileCameraPanel() {
   const [showGuide, setShowGuide] = useState(false);
   const [showDiag, setShowDiag] = useState(false);
   const [localIp, setLocalIp] = useState("");
+  const [policy, setPolicy] = useState<CameraPolicy>("RESTRICTED");
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location) {
       setLocalIp(window.location.hostname);
     }
   }, []);
+
+  useEffect(() => {
+    getCameraPolicy("C-21")
+      .then((res) => {
+        if (res?.policy) setPolicy(res.policy);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handlePolicyChange = async (newPolicy: CameraPolicy) => {
+    try {
+      await setCameraPolicy("C-21", newPolicy);
+      setPolicy(newPolicy);
+      toast.success(`C-21 operational policy updated to ${newPolicy}`);
+    } catch {
+      toast.error("Failed to update C-21 policy");
+    }
+  };
 
   const authenticated = token.trim() === DEMO_TOKEN;
 
@@ -63,9 +85,35 @@ export function MobileCameraPanel() {
               <h2 className="text-lg font-semibold text-slate-100 mt-1">
                 Android Mobile Patrol Camera Ingestion
               </h2>
-              <p className="text-xs text-slate-400">
-                Live field camera ingested via phone hotspot / Wi-Fi into the shared MegaDetector & BioCLIP pipeline.
-              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="text-xs text-slate-400">
+                  Geographic Zone: <strong className="text-slate-200">BUFFER ZONE WEST</strong> · Demonstration Node
+                </span>
+                <span className="text-slate-600">|</span>
+                <label className="flex items-center gap-1.5 text-xs text-slate-300">
+                  <ShieldAlert
+                    size={13}
+                    className={
+                      policy === "CRITICAL"
+                        ? "text-red-400"
+                        : policy === "RESTRICTED"
+                        ? "text-amber-400"
+                        : "text-emerald-400"
+                    }
+                  />
+                  <span className="font-medium text-slate-300">Alert Policy:</span>
+                  <select
+                    aria-label="C-21 operational policy"
+                    value={policy}
+                    onChange={(e) => handlePolicyChange(e.target.value as CameraPolicy)}
+                    className="bg-slate-900 border border-slate-700 hover:border-slate-600 text-xs font-mono text-slate-200 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  >
+                    <option value="SAFE">SAFE / PUBLIC</option>
+                    <option value="RESTRICTED">RESTRICTED</option>
+                    <option value="CRITICAL">CRITICAL / SENSITIVE</option>
+                  </select>
+                </label>
+              </div>
             </div>
           </div>
 

@@ -74,16 +74,21 @@ export default function Alerts() {
                   <small>RISK SCORE</small>
                 </div>
                 <div className="alert-main">
-                  <div>
+                  <div className="flex items-center gap-2 flex-wrap">
                     <RiskBadge level={alert.risk_level} />
                     <span className="subtle-badge">
                       {statusLabel(alert.status)}
                     </span>
+                    {alert.policy && (
+                      <span className="subtle-badge" style={{ borderColor: 'rgba(234, 179, 8, 0.4)', color: '#facc15' }}>
+                        POLICY: {alert.policy}
+                      </span>
+                    )}
                   </div>
                   <h3>{alert.camera_id} · Ranger review required</h3>
                   <p>{alert.reasons.slice(0, 2).join(" · ")}</p>
                   <small>
-                    {dateTime(alert.timestamp)} IST · Simulated camera location
+                    {dateTime(alert.timestamp)} IST · {alert.camera_id.startsWith("C-") ? "Real hardware node" : "Simulated camera location"}
                   </small>
                 </div>
                 <Button
