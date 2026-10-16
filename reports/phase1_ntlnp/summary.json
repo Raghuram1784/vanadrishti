@@ -1,0 +1,174 @@
+{
+  "dataset": "data/validation/ntlnp_night",
+  "iou_threshold": 0.5,
+  "limit": 100,
+  "seed": 42,
+  "images_evaluated": 100,
+  "ground_truth_animals": 100,
+  "total_animal_predictions": 126,
+  "detected_animals": 94,
+  "missed_animals": 6,
+  "object_recall": 0.94,
+  "images_with_ground_truth": 100,
+  "images_with_detection": 94,
+  "image_detection_rate": 0.94,
+  "unmatched_predictions": 32,
+  "mean_matched_confidence": 0.8322,
+  "mean_best_iou": 0.8355,
+  "evaluation_time_seconds": 286.53,
+  "per_species": {
+    "AmurTiger": {
+      "images": 7,
+      "ground_truth_objects": 7,
+      "detected_objects": 7,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8543,
+      "mean_best_iou": 0.8602
+    },
+    "Badger": {
+      "images": 4,
+      "ground_truth_objects": 4,
+      "detected_objects": 4,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8786,
+      "mean_best_iou": 0.9357
+    },
+    "BlackBear": {
+      "images": 4,
+      "ground_truth_objects": 4,
+      "detected_objects": 3,
+      "missed_objects": 1,
+      "recall": 0.75,
+      "mean_matched_confidence": 0.8408,
+      "mean_best_iou": 0.638
+    },
+    "Cow": {
+      "images": 1,
+      "ground_truth_objects": 1,
+      "detected_objects": 0,
+      "missed_objects": 1,
+      "recall": 0.0,
+      "mean_matched_confidence": 0.0,
+      "mean_best_iou": 0.4863
+    },
+    "Dog": {
+      "images": 3,
+      "ground_truth_objects": 3,
+      "detected_objects": 3,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8376,
+      "mean_best_iou": 0.8551
+    },
+    "Hare": {
+      "images": 12,
+      "ground_truth_objects": 12,
+      "detected_objects": 12,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.806,
+      "mean_best_iou": 0.8526
+    },
+    "Leopard": {
+      "images": 2,
+      "ground_truth_objects": 2,
+      "detected_objects": 2,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8355,
+      "mean_best_iou": 0.8338
+    },
+    "LeopardCat": {
+      "images": 14,
+      "ground_truth_objects": 14,
+      "detected_objects": 12,
+      "missed_objects": 2,
+      "recall": 0.8571,
+      "mean_matched_confidence": 0.8812,
+      "mean_best_iou": 0.7738
+    },
+    "MuskDeer": {
+      "images": 13,
+      "ground_truth_objects": 13,
+      "detected_objects": 13,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8458,
+      "mean_best_iou": 0.8807
+    },
+    "RaccoonDog": {
+      "images": 10,
+      "ground_truth_objects": 10,
+      "detected_objects": 10,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8104,
+      "mean_best_iou": 0.8819
+    },
+    "RedFox": {
+      "images": 8,
+      "ground_truth_objects": 8,
+      "detected_objects": 8,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.9191,
+      "mean_best_iou": 0.9006
+    },
+    "RoeDeer": {
+      "images": 3,
+      "ground_truth_objects": 3,
+      "detected_objects": 3,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.7814,
+      "mean_best_iou": 0.8685
+    },
+    "Sable": {
+      "images": 4,
+      "ground_truth_objects": 4,
+      "detected_objects": 4,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.6654,
+      "mean_best_iou": 0.8104
+    },
+    "SikaDeer": {
+      "images": 2,
+      "ground_truth_objects": 2,
+      "detected_objects": 1,
+      "missed_objects": 1,
+      "recall": 0.5,
+      "mean_matched_confidence": 0.6281,
+      "mean_best_iou": 0.6451
+    },
+    "Weasel": {
+      "images": 4,
+      "ground_truth_objects": 4,
+      "detected_objects": 3,
+      "missed_objects": 1,
+      "recall": 0.75,
+      "mean_matched_confidence": 0.7221,
+      "mean_best_iou": 0.6493
+    },
+    "WildBoar": {
+      "images": 7,
+      "ground_truth_objects": 7,
+      "detected_objects": 7,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8189,
+      "mean_best_iou": 0.9164
+    },
+    "Y.T.Marten": {
+      "images": 2,
+      "ground_truth_objects": 2,
+      "detected_objects": 2,
+      "missed_objects": 0,
+      "recall": 1.0,
+      "mean_matched_confidence": 0.8977,
+      "mean_best_iou": 0.9125
+    }
+  }
+}

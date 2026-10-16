@@ -1,0 +1,21 @@
+{
+  "scenario_id": "scenario_02_person_core_night",
+  "title": "Unauthorized Human Presence in Core Habitat at Night",
+  "description": "An unidentified person is detected inside the critical core tiger habitat in the middle of the night without authorized patrol clearance.",
+  "expected_risk_level": "CRITICAL",
+  "expected_min_score": 75,
+  "expected_max_score": 100,
+  "events": [
+    {
+      "event_id": "EVT-DEMO-0201",
+      "camera_id": "CAM-01",
+      "timestamp": "2026-10-07T23:41:00",
+      "object_type": "person",
+      "confidence": 0.89,
+      "bbox": [0.42, 0.31, 0.58, 0.79],
+      "zone_type": "CORE",
+      "patrol_authorized": false,
+      "notes": "Night motion detection on core forest trail. No ranger patrol scheduled."
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+image,ntlnp_species,target_group,detected,best_iou,pred_species,pred_group,ranking_score,top1_correct,top3_correct,e2e_top1_success,e2e_top3_success,failure_reason
+AmurTiger_448.jpg,AmurTiger,tiger,True,0.9273,Bengal tiger,tiger,0.9952,True,True,True,True,success
+AmurTiger_987.jpg,AmurTiger,tiger,True,0.9059,Bengal tiger,tiger,0.9912,True,True,True,True,success
+AmurTiger_28.jpg,AmurTiger,tiger,True,0.7071,Bengal tiger,tiger,0.9945,True,True,True,True,success
+AmurTiger3409.jpg,AmurTiger,tiger,True,0.8991,Indian leopard,leopard,0.4291,False,True,False,True,species_top1_wrong
+AmurTiger_33.jpg,AmurTiger,tiger,False,0.4427,None,None,0.0,False,False,False,False,detector_iou_below_threshold
+AmurTiger_985.jpg,AmurTiger,tiger,True,0.809,Bengal tiger,tiger,0.9933,True,True,True,True,success
+AmurTiger_410.jpg,AmurTiger,tiger,True,0.7023,Bengal tiger,tiger,0.9985,True,True,True,True,success
+AmurTiger_999.jpg,AmurTiger,tiger,True,0.5177,Bengal tiger,tiger,0.9987,True,True,True,True,success
+AmurTiger_76.jpg,AmurTiger,tiger,True,0.8808,Bengal tiger,tiger,0.9742,True,True,True,True,success
+AmurTiger_926.jpg,AmurTiger,tiger,True,0.8524,Bengal tiger,tiger,0.9867,True,True,True,True,success
+AmurTiger3572.jpg,AmurTiger,tiger,True,0.7577,Bengal tiger,tiger,0.938,True,True,True,True,success
+AmurTiger_988.jpg,AmurTiger,tiger,True,0.9799,Bengal tiger,tiger,0.9958,True,True,True,True,success
+AmurTiger1150.jpg,AmurTiger,tiger,True,0.7027,Bengal tiger,tiger,0.9879,True,True,True,True,success
+AmurTiger402.jpg,AmurTiger,tiger,True,0.771,Bengal tiger,tiger,0.9549,True,True,True,True,success
+AmurTiger31.jpg,AmurTiger,tiger,True,0.9128,Bengal tiger,tiger,0.9619,True,True,True,True,success
+AmurTiger808.jpg,AmurTiger,tiger,True,0.7659,Bengal tiger,tiger,0.7895,True,True,True,True,success
+AmurTiger_484.jpg,AmurTiger,tiger,True,0.8605,Bengal tiger,tiger,0.9976,True,True,True,True,success
+AmurTiger_1032.jpg,AmurTiger,tiger,True,0.5603,Bengal tiger,tiger,0.9911,True,True,True,True,success
+AmurTiger_1010.jpg,AmurTiger,tiger,True,0.929,wild boar,wild_boar,0.3874,False,False,False,False,species_top3_miss
+AmurTiger_392.jpg,AmurTiger,tiger,True,0.8429,Bengal tiger,tiger,0.9965,True,True,True,True,success
+AmurLeopard_1368.jpg,Leopard,leopard,True,0.5974,sloth bear,sloth_bear,0.4091,False,True,False,True,species_top1_wrong
+AmurLeopard_1207.jpg,Leopard,leopard,True,0.9681,Indian leopard,leopard,0.9997,True,True,True,True,success
+AmurLeopard_648.jpg,Leopard,leopard,True,0.7397,Indian leopard,leopard,0.9999,True,True,True,True,success
+AmurLeopard_590.jpg,Leopard,leopard,True,0.6577,Indian leopard,leopard,0.9998,True,True,True,True,success
+AmurLeopard_1250.jpg,Leopard,leopard,True,0.891,Indian leopard,leopard,0.9998,True,True,True,True,success
+AmurLeopard_1353.jpg,Leopard,leopard,False,0.0,None,None,0.0,False,False,False,False,detector_miss
+leopard_637.jpg,Leopard,leopard,True,0.5922,Indian leopard,leopard,0.9999,True,True,True,True,success
+AmurLeopard_1194.jpg,Leopard,leopard,True,0.7684,Indian leopard,leopard,0.7283,True,True,True,True,success
+AmurLeopard_1344.jpg,Leopard,leopard,True,0.746,Indian leopard,leopard,0.9548,True,True,True,True,success
+AmurLeopard_187.jpg,Leopard,leopard,True,0.7309,Indian leopard,leopard,0.9838,True,True,True,True,success
+leopard_3270.jpg,Leopard,leopard,True,0.8616,Indian leopard,leopard,0.9986,True,True,True,True,success
+AmurLeopard_714.jpg,Leopard,leopard,True,0.9597,Indian leopard,leopard,0.9974,True,True,True,True,success
+AmurLeopard_545.jpg,Leopard,leopard,False,0.4964,None,None,0.0,False,False,False,False,detector_iou_below_threshold
+AmurLeopard_1257.jpg,Leopard,leopard,True,0.6589,Indian leopard,leopard,0.9998,True,True,True,True,success
+leopard_636.jpg,Leopard,leopard,True,0.5535,Indian leopard,leopard,0.9995,True,True,True,True,success
+AmurLeopard_28.jpg,Leopard,leopard,True,0.9598,Indian leopard,leopard,0.9997,True,True,True,True,success
+leopard_1689.jpg,Leopard,leopard,True,0.7861,Indian leopard,leopard,0.9998,True,True,True,True,success
+AmurLeopard_1283.jpg,Leopard,leopard,True,0.8818,Indian leopard,leopard,0.9998,True,True,True,True,success
+AmurLeopard_1369.jpg,Leopard,leopard,True,0.5343,dhole / Indian wild dog,dhole,0.3718,False,True,False,True,species_top1_wrong
+AmurLeopard_711.jpg,Leopard,leopard,True,0.719,Indian leopard,leopard,0.9997,True,True,True,True,success
+WildBoar910.jpg,WildBoar,wild_boar,True,0.9751,wild boar,wild_boar,0.9787,True,True,True,True,success
+Wildboar_1837.jpg,WildBoar,wild_boar,True,0.9153,wild boar,wild_boar,0.8284,True,True,True,True,success
+WildBoar (144).jpg,WildBoar,wild_boar,True,0.91,sloth bear,sloth_bear,0.7907,False,True,False,True,species_top1_wrong
+Wildboar_1836.jpg,WildBoar,wild_boar,True,0.9584,wild boar,wild_boar,0.8673,True,True,True,True,success
+WildBoar (104).jpg,WildBoar,wild_boar,True,0.7839,wild boar,wild_boar,0.9977,True,True,True,True,success
+Wildboar_1816.jpg,WildBoar,wild_boar,True,0.9564,gaur,gaur,0.6577,False,True,False,True,species_top1_wrong
+Wildboar_2197.jpg,WildBoar,wild_boar,True,0.9537,sambar deer,sambar,0.4479,False,True,False,True,species_top1_wrong
+WildBoar1138.jpg,WildBoar,wild_boar,True,0.8671,wild boar,wild_boar,0.9435,True,True,True,True,success
+WildBoar345.jpg,WildBoar,wild_boar,False,0.0,None,None,0.0,False,False,False,False,detector_miss
+Wildboar_2018.jpg,WildBoar,wild_boar,True,0.965,wild boar,wild_boar,0.983,True,True,True,True,success
+WildBoar_2392.jpg,WildBoar,wild_boar,True,0.9218,sloth bear,sloth_bear,0.5597,False,True,False,True,species_top1_wrong
+WildBoar769.jpg,WildBoar,wild_boar,True,0.9587,wild boar,wild_boar,0.9938,True,True,True,True,success
+WildBoar198.jpg,WildBoar,wild_boar,True,0.8817,wild boar,wild_boar,0.3161,True,True,True,True,success
+WildBoar1427.jpg,WildBoar,wild_boar,True,0.7362,wild boar,wild_boar,0.9937,True,True,True,True,success
+WildBoar (98).jpg,WildBoar,wild_boar,True,0.8558,wild boar,wild_boar,0.991,True,True,True,True,success
+WildBoar197.jpg,WildBoar,wild_boar,True,0.9136,wild boar,wild_boar,0.9784,True,True,True,True,success
+WildBoar668.jpg,WildBoar,wild_boar,True,0.9711,wild boar,wild_boar,0.9938,True,True,True,True,success
+Wildboar_1872.jpg,WildBoar,wild_boar,True,0.8944,wild boar,wild_boar,0.5633,True,True,True,True,success
+WildBoar410.jpg,WildBoar,wild_boar,False,0.0,None,None,0.0,False,False,False,False,detector_miss
+WildBoar_2454.jpg,WildBoar,wild_boar,True,0.8691,wild boar,wild_boar,0.5017,True,True,True,True,success

@@ -1,0 +1,21 @@
+{
+  "scenario_id": "scenario_01_normal_patrol",
+  "title": "Authorized Ranger Patrol during Permitted Daytime Hours",
+  "description": "An authorized forest ranger conducts routine foot patrol along the Moharli buffer trail during permitted daytime hours.",
+  "expected_risk_level": "MEDIUM",
+  "expected_min_score": 25,
+  "expected_max_score": 49,
+  "events": [
+    {
+      "event_id": "EVT-DEMO-0101",
+      "camera_id": "CAM-04",
+      "timestamp": "2026-10-07T10:30:00",
+      "object_type": "person",
+      "confidence": 0.88,
+      "bbox": [0.35, 0.20, 0.65, 0.85],
+      "zone_type": "BUFFER",
+      "patrol_authorized": true,
+      "notes": "Scheduled beat inspection with authorized GPS patrol tracker active."
+    }
+  ]
+}

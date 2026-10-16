@@ -10,3 +10,14 @@ PytorchWildlife>=1.2.0
 setuptools<72
 huggingface-hub<2.0.0,>=1.3.0
 soundfile>=0.12.1
+
+# Phase 2: Species Recognition (BioCLIP 2)
+open-clip-torch>=2.24.0
+# Phase 4A: HTTP backend
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+python-multipart>=0.0.18,<1
+httpx>=0.27,<1
+
+# Phase 4C: Uvicorn WebSocket transport
+websockets>=13,<17

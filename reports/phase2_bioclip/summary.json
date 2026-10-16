@@ -1,0 +1,35 @@
+{
+  "dataset": "C:\\Users\\Raghu Ram\\Desktop\\vanadrishti\\data\\validation\\ntlnp_night",
+  "total_images": 60,
+  "top1_correct": 55,
+  "top1_accuracy": 0.9167,
+  "top3_correct": 59,
+  "top3_accuracy": 0.9833,
+  "mean_top1_score": 0.9116,
+  "per_species": {
+    "tiger": {
+      "images": 20,
+      "top1_correct": 19,
+      "top1_accuracy": 0.95,
+      "top3_correct": 19,
+      "top3_accuracy": 0.95,
+      "mean_top1_score": 0.9454
+    },
+    "leopard": {
+      "images": 20,
+      "top1_correct": 19,
+      "top1_accuracy": 0.95,
+      "top3_correct": 20,
+      "top3_accuracy": 1.0,
+      "mean_top1_score": 0.947
+    },
+    "wild_boar": {
+      "images": 20,
+      "top1_correct": 17,
+      "top1_accuracy": 0.85,
+      "top3_correct": 20,
+      "top3_accuracy": 1.0,
+      "mean_top1_score": 0.8425
+    }
+  }
+}

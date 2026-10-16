@@ -143,7 +143,8 @@ class WildlifeDetector:
     def detect(
         self,
         frame: np.ndarray,
-        conf_threshold: Optional[float] = None
+        conf_threshold: Optional[float] = None,
+        *, candidate_sink: Optional[list] = None
     ) -> List[Dict[str, Any]]:
         """
         Perform animal, person, and vehicle detection on a single OpenCV BGR frame.
@@ -174,16 +175,19 @@ class WildlifeDetector:
 
         global_threshold = conf_threshold if conf_threshold is not None else self.default_conf_threshold
 
-        # MegaDetector expects RGB image
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Installed PyTorch-Wildlife forwards NumPy arrays unchanged to Ultralytics.
+        # Ultralytics expects BGR arrays and converts once to RGB model tensors.
+        model_frame = frame
 
         # Query MegaDetector at minimum threshold to capture candidates across all target classes
         min_class_thresh = min(CLASS_THRESHOLDS.values())
         model_query_thresh = min(global_threshold, min_class_thresh)
+        if candidate_sink is not None:
+            model_query_thresh = min(model_query_thresh, 0.05)
 
         # Run inference through PyTorch-Wildlife
         raw_results = self._model.single_image_detection(
-            rgb_frame,
+            model_frame,
             det_conf_thres=model_query_thresh
         )
 
@@ -211,8 +215,6 @@ class WildlifeDetector:
             effective_threshold = max(global_threshold, class_threshold)
 
             # Discard detection if confidence is below effective threshold for this class
-            if conf < effective_threshold:
-                continue
 
             # Calculate and clamp normalized coordinates [0.0, 1.0]
             x1_norm = max(0.0, min(1.0, float(x1_px / width)))
@@ -220,7 +222,7 @@ class WildlifeDetector:
             x2_norm = max(0.0, min(1.0, float(x2_px / width)))
             y2_norm = max(0.0, min(1.0, float(y2_px / height)))
 
-            detections.append({
+            candidate = {
                 "class": class_name,
                 "confidence": round(conf, 4),
                 "bbox": [
@@ -229,7 +231,11 @@ class WildlifeDetector:
                     round(x2_norm, 4),
                     round(y2_norm, 4)
                 ]
-            })
+            }
+            if candidate_sink is not None:
+                candidate_sink.append({**candidate, "confidence": conf})
+            if conf >= effective_threshold:
+                detections.append(candidate)
 
         return detections
 
@@ -265,8 +271,8 @@ def denormalize_bbox(
     """
     x1, y1, x2, y2 = bbox
     return (
-        int(round(x1 * width)),
-        int(round(y1 * height)),
-        int(round(x2 * width)),
-        int(round(y2 * height))
+        round(x1 * width),
+        round(y1 * height),
+        round(x2 * width),
+        round(y2 * height)
     )

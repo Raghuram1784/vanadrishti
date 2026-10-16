@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "description": "Deterministic, explainable security risk scoring rules for VanaDrishti wildlife monitoring.",
+  "scoring_weights": {
+    "person": {
+      "base_detection": 25,
+      "zone_core": 30,
+      "zone_restricted": 20,
+      "outside_allowed_hours": 20,
+      "patrol_unauthorized": 20,
+      "repeated_activity": 10
+    },
+    "vehicle": {
+      "base_detection": 20,
+      "zone_core": 30,
+      "zone_restricted": 20,
+      "outside_allowed_hours": 20,
+      "patrol_unauthorized": 15,
+      "repeated_activity": 10
+    },
+    "wildlife_context": {
+      "recent_high_value_wildlife_nearby": 15,
+      "recent_animal_activity_prior": 10
+    }
+  },
+  "risk_levels": {
+    "LOW": { "min": 0, "max": 24, "alert": false, "action": "Log event for wildlife monitoring." },
+    "MEDIUM": { "min": 25, "max": 49, "alert": true, "action": "Monitor camera feed and log event on ranger dashboard." },
+    "HIGH": { "min": 50, "max": 74, "alert": true, "action": "Review camera footage and alert nearest field patrol." },
+    "CRITICAL": { "min": 75, "max": 100, "alert": true, "action": "Review evidence immediately and dispatch rapid response patrol." }
+  },
+  "time_windows": {
+    "repeated_activity_minutes": 30,
+    "recent_wildlife_minutes": 60,
+    "prior_animal_minutes": 30
+  },
+  "proximity_meters": {
+    "nearby_camera_max_distance": 1500.0
+  },
+  "high_value_species": [
+    "bengal_tiger",
+    "tiger",
+    "indian_leopard",
+    "leopard",
+    "sloth_bear",
+    "gaur"
+  ]
+}

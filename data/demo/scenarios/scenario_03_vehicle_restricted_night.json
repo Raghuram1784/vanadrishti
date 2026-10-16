@@ -1,0 +1,21 @@
+{
+  "scenario_id": "scenario_03_vehicle_restricted_night",
+  "title": "Unauthorized Vehicle on Restricted Fireline Corridor at Night",
+  "description": "An unauthorized motor vehicle enters a restricted forest fireline during late night hours outside permitted maintenance hours.",
+  "expected_risk_level": "CRITICAL",
+  "expected_min_score": 75,
+  "expected_max_score": 100,
+  "events": [
+    {
+      "event_id": "EVT-DEMO-0301",
+      "camera_id": "CAM-03",
+      "timestamp": "2026-10-08T02:15:00",
+      "object_type": "vehicle",
+      "confidence": 0.81,
+      "bbox": [0.20, 0.40, 0.70, 0.85],
+      "zone_type": "RESTRICTED",
+      "patrol_authorized": false,
+      "notes": "Headlights detected entering restricted perimeter firebreak."
+    }
+  ]
+}

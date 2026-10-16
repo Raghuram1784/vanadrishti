@@ -1,0 +1,34 @@
+{
+  "scenario_id": "scenario_04_tiger_then_person",
+  "title": "Tiger Activity Followed by Human Presence at Nearby Camera",
+  "description": "A Bengal tiger is recorded at Telia Stream Crossing (CAM-02). 15 minutes later, an unauthorized person is detected at North Forest Trail (CAM-01, ~450m away), indicating heightened wildlife security concern.",
+  "expected_risk_level": "CRITICAL",
+  "expected_min_score": 75,
+  "expected_max_score": 100,
+  "events": [
+    {
+      "event_id": "EVT-DEMO-0401",
+      "camera_id": "CAM-02",
+      "timestamp": "2026-10-07T22:15:00",
+      "object_type": "animal",
+      "confidence": 0.94,
+      "bbox": [0.25, 0.35, 0.75, 0.85],
+      "species": "Bengal tiger",
+      "species_score": 0.99,
+      "zone_type": "CORE",
+      "patrol_authorized": false,
+      "notes": "Adult tiger moving along stream bank towards North Trail."
+    },
+    {
+      "event_id": "EVT-DEMO-0402",
+      "camera_id": "CAM-01",
+      "timestamp": "2026-10-07T22:30:00",
+      "object_type": "person",
+      "confidence": 0.87,
+      "bbox": [0.40, 0.25, 0.60, 0.78],
+      "zone_type": "CORE",
+      "patrol_authorized": false,
+      "notes": "Person detected on North Forest Trail 15 minutes after tiger crossed downstream."
+    }
+  ]
+}

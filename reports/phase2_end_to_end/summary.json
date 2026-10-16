@@ -1,0 +1,85 @@
+{
+  "dataset": "C:\\Users\\Raghu Ram\\Desktop\\vanadrishti\\data\\validation\\ntlnp_night",
+  "iou_threshold": 0.5,
+  "seed": 42,
+  "limit_per_species": 20,
+  "total_images": 60,
+  "duration_seconds": 169.79,
+  "detection_stage": {
+    "total_images": 60,
+    "ground_truth_animals": 60,
+    "animals_detected": 55,
+    "animals_missed": 5,
+    "detector_recall": 0.9167,
+    "mean_matched_iou": 0.8214
+  },
+  "species_stage_on_detected": {
+    "classified_animals": 55,
+    "top1_correct": 47,
+    "top1_accuracy": 0.8545,
+    "top3_correct": 54,
+    "top3_accuracy": 0.9818,
+    "mean_top1_ranking_score": 0.8762
+  },
+  "end_to_end": {
+    "ground_truth_animals": 60,
+    "e2e_top1_correct": 47,
+    "e2e_top1_success_rate": 0.7833,
+    "e2e_top3_correct": 54,
+    "e2e_top3_success_rate": 0.9
+  },
+  "failure_breakdown": {
+    "success": 47,
+    "species_top1_wrong": 7,
+    "species_top3_miss": 1,
+    "detector_iou_below_threshold": 2,
+    "detector_miss": 3
+  },
+  "per_target_group": {
+    "tiger": {
+      "images": 20,
+      "gt_animals": 20,
+      "detected": 19,
+      "detector_recall": 0.95,
+      "classified": 19,
+      "top1_correct": 17,
+      "top1_classification_accuracy_on_detected": 0.8947,
+      "end_to_end_top1_success_rate": 0.85,
+      "top3_correct": 18,
+      "top3_classification_accuracy_on_detected": 0.9474,
+      "end_to_end_top3_success_rate": 0.9,
+      "mean_ranking_score": 0.9138,
+      "mean_matched_iou": 0.8044
+    },
+    "leopard": {
+      "images": 20,
+      "gt_animals": 20,
+      "detected": 18,
+      "detector_recall": 0.9,
+      "classified": 18,
+      "top1_correct": 16,
+      "top1_classification_accuracy_on_detected": 0.8889,
+      "end_to_end_top1_success_rate": 0.8,
+      "top3_correct": 18,
+      "top3_classification_accuracy_on_detected": 1.0,
+      "end_to_end_top3_success_rate": 0.9,
+      "mean_ranking_score": 0.9134,
+      "mean_matched_iou": 0.7559
+    },
+    "wild_boar": {
+      "images": 20,
+      "gt_animals": 20,
+      "detected": 18,
+      "detector_recall": 0.9,
+      "classified": 18,
+      "top1_correct": 14,
+      "top1_classification_accuracy_on_detected": 0.7778,
+      "end_to_end_top1_success_rate": 0.7,
+      "top3_correct": 18,
+      "top3_classification_accuracy_on_detected": 1.0,
+      "end_to_end_top3_success_rate": 0.9,
+      "mean_ranking_score": 0.7992,
+      "mean_matched_iou": 0.9048
+    }
+  }
+}

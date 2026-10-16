@@ -69,6 +69,8 @@ data/demo/*
 !data/demo/.gitkeep
 data/samples/*
 !data/samples/.gitkeep
+data/validation/ntlnp_night/
+data/validation/*
 *.mp4
 *.avi
 *.mov
@@ -88,3 +90,34 @@ Desktop.ini
 # Logs
 *.log
 logs/
+
+# Backend runtime state and reusable demo definitions
+data/*.db
+data/*.db-*
+!data/demo/scenarios/
+!data/demo/scenarios/*.json
+
+# Original image evidence
+data/evidence/
+
+# Local secrets, runtime databases, caches, and generated evaluation media
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.db
+*.db-*
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.huggingface/
+htmlcov/
+.coverage*
+*.tsbuildinfo
+reports/**/*.jpg
+reports/**/*.jpeg
+reports/**/*.png
+reports/**/*.webp

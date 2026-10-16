@@ -1,0 +1,127 @@
+{
+  "type": "FeatureCollection",
+  "name": "VanaDrishti_Demo_Camera_Network",
+  "description": "DEMO / SIMULATED camera trap surveillance nodes for testing and evaluation. Coordinates and zone boundaries are purely synthetic demo data.",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [79.361, 20.248]
+      },
+      "properties": {
+        "camera_id": "CAM-01",
+        "name": "North Forest Trail Tower",
+        "zone_name": "Demo Core Zone A",
+        "zone_type": "CORE",
+        "active": true,
+        "allowed_hours": {
+          "start": "06:00",
+          "end": "18:00"
+        },
+        "patrol_authorized": false,
+        "notes": "Simulated high-density wildlife corridor in core reserve."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [79.364, 20.251]
+      },
+      "properties": {
+        "camera_id": "CAM-02",
+        "name": "Telia Stream Crossing",
+        "zone_name": "Demo Core Zone A",
+        "zone_type": "CORE",
+        "active": true,
+        "allowed_hours": {
+          "start": "06:00",
+          "end": "18:00"
+        },
+        "patrol_authorized": false,
+        "notes": "Simulated natural watering hole ~450m from CAM-01."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [79.375, 20.240]
+      },
+      "properties": {
+        "camera_id": "CAM-03",
+        "name": "Kolsa Fireline Post",
+        "zone_name": "Demo Restricted Fireline",
+        "zone_type": "RESTRICTED",
+        "active": true,
+        "allowed_hours": {
+          "start": "06:00",
+          "end": "19:00"
+        },
+        "patrol_authorized": false,
+        "notes": "Simulated vehicular maintenance and ranger patrol boundary."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [79.312, 20.278]
+      },
+      "properties": {
+        "camera_id": "CAM-04",
+        "name": "Moharli Buffer Track",
+        "zone_name": "Demo Buffer Zone West",
+        "zone_type": "BUFFER",
+        "active": true,
+        "allowed_hours": {
+          "start": "05:00",
+          "end": "21:00"
+        },
+        "patrol_authorized": true,
+        "notes": "Simulated eco-tourism and village boundary corridor."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [79.295, 20.285]
+      },
+      "properties": {
+        "camera_id": "CAM-05",
+        "name": "Public Highway Perimeter",
+        "zone_name": "Demo Public Perimeter",
+        "zone_type": "PUBLIC",
+        "active": true,
+        "allowed_hours": {
+          "start": "00:00",
+          "end": "23:59"
+        },
+        "patrol_authorized": false,
+        "notes": "Simulated public transit peripheral road."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [79.363, 20.250]
+      },
+      "properties": {
+        "camera_id": "C-18",
+        "name": "Sector C-18 Trail Camera — Laptop Prototype Node",
+        "zone_name": "Demo Core Zone A",
+        "zone_type": "CORE",
+        "active": true,
+        "allowed_hours": {
+          "start": "06:00",
+          "end": "18:00"
+        },
+        "patrol_authorized": false,
+        "notes": "Simulated prototype trail camera node for laptop webcam field testing. Synthetic demo location; not real sanctuary coordinates."
+      }
+    }
+  ]
+}

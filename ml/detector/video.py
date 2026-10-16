@@ -135,11 +135,11 @@ def process_video(
         if out_dir:
             os.makedirs(out_dir, exist_ok=True)
 
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        fourcc = getattr(cv2, "VideoWriter_fourcc", cv2.VideoWriter.fourcc)(*"mp4v")
         writer = cv2.VideoWriter(output_path, fourcc, src_fps, (frame_width, frame_height))
         if not writer.isOpened():
             logger.warning("Failed to open VideoWriter with 'mp4v' codec. Trying 'XVID'...")
-            fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            fourcc = getattr(cv2, "VideoWriter_fourcc", cv2.VideoWriter.fourcc)(*"XVID")
             writer = cv2.VideoWriter(output_path, fourcc, src_fps, (frame_width, frame_height))
 
         if writer.isOpened():

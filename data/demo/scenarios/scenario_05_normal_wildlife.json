@@ -1,0 +1,36 @@
+{
+  "scenario_id": "scenario_05_normal_wildlife",
+  "title": "Normal Wildlife Activity at Forest Waterhole",
+  "description": "A Bengal tiger followed by chital deer visit the waterhole at night. Biological activities are logged into monitoring records without raising security alarms.",
+  "expected_risk_level": "LOW",
+  "expected_min_score": 0,
+  "expected_max_score": 24,
+  "events": [
+    {
+      "event_id": "EVT-DEMO-0501",
+      "camera_id": "CAM-02",
+      "timestamp": "2026-10-07T21:00:00",
+      "object_type": "animal",
+      "confidence": 0.93,
+      "bbox": [0.20, 0.30, 0.80, 0.85],
+      "species": "Bengal tiger",
+      "species_score": 0.98,
+      "zone_type": "CORE",
+      "patrol_authorized": false,
+      "notes": "Tiger drinking at Telia stream crossing."
+    },
+    {
+      "event_id": "EVT-DEMO-0502",
+      "camera_id": "CAM-02",
+      "timestamp": "2026-10-07T21:25:00",
+      "object_type": "animal",
+      "confidence": 0.89,
+      "bbox": [0.30, 0.40, 0.70, 0.90],
+      "species": "chital / spotted deer",
+      "species_score": 0.96,
+      "zone_type": "CORE",
+      "patrol_authorized": false,
+      "notes": "Small group of spotted deer arriving at waterhole."
+    }
+  ]
+}

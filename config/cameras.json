@@ -46,5 +46,17 @@
     "type": "boundary_watch",
     "status": "active",
     "stream_source": "data/demo/kolara_buffer.mp4"
+  },
+  {
+    "camera_id": "C-18",
+    "name": "Sector C-18 Trail Camera — Laptop Prototype Node",
+    "zone": "core",
+    "location": {
+      "latitude": 20.250,
+      "longitude": 79.363
+    },
+    "type": "trail_camera",
+    "status": "active",
+    "stream_source": "laptop_webcam"
   }
 ]
