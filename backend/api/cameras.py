@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from backend.api.analyze import decode_image
 from ml.pipeline import analyze_frame, FrameStatus
+from ml.pipeline.models import QualityStatus
 from backend.services.context_service import camera_payload, DISCLAIMER, local_timestamp
 from backend.schemas.api import (
     CreateSessionRequest,
@@ -144,6 +145,16 @@ def live_frame(
     confirmed = [d for d in detections if not d.get('uncertain')]
     if not confirmed:
         recent_activity = sessions.get_recent_activity(camera_id, current_time=ts) if sessions else None
+        reasons = (['Uncertain object evidence; species not classified.'] if detections
+                   else ['No retained detections.'])
+        action = 'Additional observation recommended.' if detections else 'Continue observation.'
+        if analysis.image_quality and analysis.image_quality.status != QualityStatus.GOOD:
+            # Qualify this response only; do not change contextual risk policy or incidents.
+            reasons += [
+                f'Frame quality {analysis.image_quality.status.value}: absence of detections is not evidence that the area is clear.',
+                'LOW / 0 reflects no confirmed detection in this sample, not a scene safety assessment.',
+            ]
+            action = 'Obtain a usable image and continue observation; do not infer that the area is clear.'
         return LiveFrameResponse(
             frame_analysis=analysis,
             event_state='UNCERTAIN_DETECTION' if detections else 'NO_DETECTION',
@@ -165,8 +176,8 @@ def live_frame(
                 'score': 0,
                 'level': 'LOW',
                 'alert': False,
-                'reasons': ['Uncertain object evidence; species not classified.'] if detections else ['No retained detections.'],
-                'recommended_action': 'Additional observation recommended.' if detections else 'Continue observation.',
+                'reasons': reasons,
+                'recommended_action': action,
             },
             evidence_image_url=None,
             session_id=session_id,

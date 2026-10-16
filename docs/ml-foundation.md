@@ -110,3 +110,38 @@ focused tests also passed independently. `npm run build` passed (30.06 seconds)
 with the existing bundle-size warning. No pre-existing test failures were found.
 `git diff --check` passed. Timing variation in the test/build runs is not a
 measurement of production inference performance.
+
+## Final acceptance review of 02b121c
+
+The review found a presentation gap: the live API retained nested quality data,
+but the live panel ignored it and showed "Sample clear" for empty detections.
+The empty-result LOW/0 response also lacked a visibility qualification.
+
+The compatibility-safe correction keeps event_state, risk scores/levels, alert
+booleans, detections and persistence policy unchanged. DEGRADED/UNUSABLE samples
+without confirmed detections now include explicit qualifications in the endpoint's
+risk reasons/action: absence is not established and a usable image is needed.
+LOW/0 is a legacy no-confirmed-detection result, never scene-clearance evidence.
+The client shows quality reasons/warnings in the existing sample panel and risk
+reasons, including when recent-activity risk overrides the latest sample's risk.
+Missing quality on older responses receives an explicit unavailable message.
+"Sample clear" has been removed even for GOOD frames: no detector proves absence.
+
+Confirmed detections on poor-quality frames still use existing NEW/CONTINUATION
+and contextual risk paths, with explicit frame quality retained. Uncertain/empty
+poor frames create no incident, alert, or evidence. A covered gap neither clears
+nor refreshes prior confirmed activity and does not cause duplicate incidents.
+Recent activity still expires according to its existing time window.
+
+No contextual risk engine, incident persistence, or temporal-state implementation
+was changed. Quality persistence on historical incident records, camera-health
+persistence, maintenance tickets, notification changes, C-21, offline transport,
+and any risk-policy changes remain deferred. This review covers the live-frame
+response and its current operator panel, not new historical incident schemas.
+
+Acceptance checks: complete Python suite 141 passed plus 4 subtests (previously
+131 plus 4); same 5 deprecation warnings. Ten new API tests cover black, nearly
+black, white, low-detail, confident, uncertain, and continuity scenarios. All 14
+frontend tests pass, including 4 actual live-panel render tests. Production build
+passes with the existing large-bundle warning. No physical webcam trial was
+performed; API and rendered component behavior were tested with controlled inputs.

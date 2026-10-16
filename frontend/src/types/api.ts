@@ -138,7 +138,17 @@ export interface RecentActivity {
   monitoring_status?: string | null;
 }
 
+export interface FrameAnalysis {
+  status: "CONFIRMED_DETECTION" | "UNCERTAIN_DETECTION" | "NO_DETECTION" | "DEGRADED_FRAME" | "INVALID_FRAME" | "INFERENCE_ERROR";
+  image_quality: {
+    status: "GOOD" | "DEGRADED" | "UNUSABLE";
+    reasons: string[];
+  } | null;
+  warnings: string[];
+}
+
 export interface LiveFrameResponse {
+  frame_analysis?: FrameAnalysis | null;
   event_state: EventState;
   event_id: string | null;
   timestamp: string;

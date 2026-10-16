@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DetectionImage } from "@/components/analysis/DetectionImage";
 import { ResultPanels } from "@/components/analysis/ResultPanels";
 import { useLaptopCamera } from "./useLaptopCamera";
+import { frameQualityNotice } from "./frameQuality";
 
 const CAMERA_ID = "C-18";
 const CAMERA_NAME = "Sector C-18 Trail Camera — Laptop Prototype Node";
@@ -16,6 +17,7 @@ export function LiveCameraPanel() {
     latestResult, analyzedFrameUrl, error, videoRef, devices, selectedDevice,
     setSelectedDevice, diagnostics, refreshDevices, startCamera, stopCamera, togglePause,
   } = useLaptopCamera();
+  const qualityNotice = latestResult ? frameQualityNotice(latestResult.frame_analysis) : null;
 
   return (
     <div className="live-camera-layout">
@@ -222,6 +224,12 @@ export function LiveCameraPanel() {
             )}
           </div>
 
+          {qualityNotice && (
+            <div className="active-event-alert-banner" role="status">
+              <AlertTriangle size={18} className="text-warning shrink-0" />
+              <p>{qualityNotice}</p>
+            </div>
+          )}
           <div className="analyzed-frame-wrap">
             {analyzedFrameUrl ? (
               <DetectionImage
@@ -290,7 +298,7 @@ export function LiveCameraPanel() {
                           `Detector score: ${latestResult.detections[0].score.toFixed(4)}`
                         )
                       ) : (
-                        "Sample clear"
+                        qualityNotice ? "Visibility limited; absence not established" : "No retained detections; absence not established"
                       )}
                     </span>
                   </div>
@@ -390,7 +398,7 @@ export function LiveCameraPanel() {
 
         return (
           <div className="analysis-results">
-            {/* Active event preservation alert when sample is clear but activity ongoing */}
+            {/* Active event context when the latest sample has no detections */}
             {latestResult.detections.length === 0 && hasActiveRecentEvent && (
               <div className="active-event-alert-banner">
                 <AlertTriangle size={18} className="text-warning shrink-0" />
@@ -476,7 +484,7 @@ export function LiveCameraPanel() {
                 camera: latestResult.camera,
                 detections: latestResult.detections,
                 context: latestResult.context,
-                risk: displayRisk,
+                risk: qualityNotice ? { ...displayRisk, reasons: [qualityNotice, ...displayRisk.reasons] } : displayRisk,
                 evidence_image_url: latestResult.evidence_image_url,
               }}
             />
