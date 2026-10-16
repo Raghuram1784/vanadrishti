@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, FileSpreadsheet } from "lucide-react";
 import { useCameras } from "@/hooks/useCameras";
 import { useEvents } from "@/hooks/useEvents";
 import { useAlerts } from "@/hooks/useAlerts";
@@ -7,6 +7,10 @@ import type { Event } from "@/types/api";
 import { EventTable } from "@/components/events/EventTable";
 import { ResultPanels } from "@/components/analysis/ResultPanels";
 import { EventEvidence } from '@/components/analysis/EventEvidence';
+import { DetectionMetadataViewer } from "@/components/events/DetectionMetadataViewer";
+import { downloadEventsCsv } from "@/lib/metadataExport";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -103,10 +107,29 @@ export default function Events() {
             </select>
           </label>
         </div>
-        <div className="filter-caption">
-          Showing {filtered.length} of {events.data?.length ?? 0} fetched
-          events. Search and risk filters apply within the latest {limit}{" "}
-          matching events.
+        <div className="filter-caption flex items-center justify-between flex-wrap gap-2">
+          <span>
+            Showing {filtered.length} of {events.data?.length ?? 0} fetched events.
+            Search and risk filters apply within the latest {limit} matching events.
+          </span>
+          {filtered.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                downloadEventsCsv(
+                  filtered,
+                  alerts.data || [],
+                  `vanadrishti-filtered-events-${filtered.length}.csv`,
+                );
+                toast.success(`Exported ${filtered.length} filtered events to CSV`);
+              }}
+              className="text-xs h-7 px-2.5 border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200"
+            >
+              <FileSpreadsheet size={13} className="mr-1.5 text-cyan-400" />
+              <span>Export Filtered ({filtered.length}) CSV</span>
+            </Button>
+          )}
         </div>
         {events.loading ? (
           <Empty title="Loading event history…" />
@@ -147,6 +170,10 @@ export default function Events() {
               <div className="drawer-content">
                 <EventEvidence event={selected}/>
                 <ResultPanels event={selected} />
+                <DetectionMetadataViewer
+                  event={selected}
+                  alert={alerts.data?.find((a) => a.id === selected.event_id)}
+                />
               </div>
             </>
           )}

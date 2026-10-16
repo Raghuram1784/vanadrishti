@@ -22,6 +22,7 @@ import { DemoPanel } from "@/components/demo/DemoPanel";
 import { LiveCameraPanel } from "@/components/live/LiveCameraPanel";
 import { MobileCameraPanel } from "@/components/live/MobileCameraPanel";
 import { CameraGridView } from "@/components/live/CameraGridView";
+import { DetectionMetadataViewer } from "@/components/events/DetectionMetadataViewer";
 import { Layers, Smartphone } from "lucide-react";
 import { message } from "@/lib/utils";
 export default function Monitor() {
@@ -415,6 +416,9 @@ export default function Monitor() {
             </section>
           )}
           <ResultPanels event={result} />
+          <div className="md:col-span-2">
+            <DetectionMetadataViewer event={result} />
+          </div>
         </div>
       )}
       <DemoPanel />

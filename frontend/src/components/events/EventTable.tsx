@@ -1,6 +1,9 @@
 import type { Alert, Event } from "@/types/api";
 import { dateTime, statusLabel } from "@/lib/utils";
 import { Empty, RiskBadge } from "@/components/ui/shared";
+import { Button } from "@/components/ui/button";
+import { FileCode, ArrowUpRight } from "lucide-react";
+
 export function EventTable({
   events,
   alerts = [],
@@ -28,18 +31,27 @@ export function EventTable({
             <th>ALERT STATUS</th>
             <th>SOURCE</th>
             <th>EVIDENCE</th>
+            {onSelect && <th>ACTIONS</th>}
           </tr>
         </thead>
         <tbody>
           {events.map((event) => {
             const alert = alerts.find((a) => a.id === event.event_id);
             return (
-              <tr key={event.event_id}>
+              <tr
+                key={event.event_id}
+                onClick={() => onSelect?.(event)}
+                className={onSelect ? "cursor-pointer hover:bg-slate-800/50 transition-colors" : ""}
+              >
                 <td>
                   {onSelect ? (
                     <button
-                      className="table-link"
-                      onClick={() => onSelect(event)}
+                      type="button"
+                      className="table-link font-medium"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelect(event);
+                      }}
                     >
                       {dateTime(event.timestamp)}
                     </button>
@@ -83,6 +95,23 @@ export function EventTable({
                   </span>
                 </td>
                 <td>{event.evidence_image_url ? 'Stored image' : 'No image'}</td>
+                {onSelect && (
+                  <td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelect(event);
+                      }}
+                      className="text-xs h-7 px-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30 flex items-center gap-1 font-mono"
+                    >
+                      <FileCode size={12} />
+                      <span>Metadata</span>
+                      <ArrowUpRight size={11} />
+                    </Button>
+                  </td>
+                )}
               </tr>
             );
           })}
