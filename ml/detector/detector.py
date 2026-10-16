@@ -237,7 +237,71 @@ class WildlifeDetector:
             if conf >= effective_threshold:
                 detections.append(candidate)
 
+        raw_count = len(detections)
+        detections = suppress_duplicates(detections, iou_threshold=0.45, ios_threshold=0.80)
+        logger.debug("Detections before duplicate suppression: %d, after: %d", raw_count, len(detections))
+
         return detections
+
+
+def box_iou(a: List[float], b: List[float]) -> float:
+    """Intersection over Union between two normalized bounding boxes [x1, y1, x2, y2]."""
+    x1, y1, x2, y2 = max(a[0], b[0]), max(a[1], b[1]), min(a[2], b[2]), min(a[3], b[3])
+    intersection = max(0.0, x2 - x1) * max(0.0, y2 - y1)
+    area_a = max(0.0, a[2] - a[0]) * max(0.0, a[3] - a[1])
+    area_b = max(0.0, b[2] - b[0]) * max(0.0, b[3] - b[1])
+    union = area_a + area_b - intersection
+    return intersection / union if union > 0 else 0.0
+
+
+def box_ios(a: List[float], b: List[float]) -> float:
+    """Intersection over Smaller box (containment) between two normalized bounding boxes."""
+    x1, y1, x2, y2 = max(a[0], b[0]), max(a[1], b[1]), min(a[2], b[2]), min(a[3], b[3])
+    intersection = max(0.0, x2 - x1) * max(0.0, y2 - y1)
+    area_a = max(0.0, a[2] - a[0]) * max(0.0, a[3] - a[1])
+    area_b = max(0.0, b[2] - b[0]) * max(0.0, b[3] - b[1])
+    min_area = min(area_a, area_b)
+    return intersection / min_area if min_area > 0 else 0.0
+
+
+def suppress_duplicates(
+    detections: List[Dict[str, Any]],
+    iou_threshold: float = 0.45,
+    ios_threshold: float = 0.80,
+) -> List[Dict[str, Any]]:
+    """
+    Class-aware Non-Maximum Suppression (NMS) with containment handling.
+    Suppresses redundant detections of the same class when IoU >= iou_threshold
+    or containment (IoS) >= ios_threshold.
+    """
+    if len(detections) <= 1:
+        return detections
+
+    by_class: Dict[str, List[Dict[str, Any]]] = {}
+    for det in detections:
+        by_class.setdefault(det["class"], []).append(det)
+
+    kept: List[Dict[str, Any]] = []
+    for cls_name, items in by_class.items():
+        items.sort(key=lambda d: d["confidence"], reverse=True)
+        cls_kept: List[Dict[str, Any]] = []
+        for item in items:
+            suppress = False
+            for k in cls_kept:
+                iou = box_iou(item["bbox"], k["bbox"])
+                ios = box_ios(item["bbox"], k["bbox"])
+                if iou >= iou_threshold or ios >= ios_threshold:
+                    logger.debug(
+                        "Suppressed duplicate %s box (conf %.4f) by higher conf box (conf %.4f): iou=%.3f, ios=%.3f",
+                        cls_name, item["confidence"], k["confidence"], iou, ios
+                    )
+                    suppress = True
+                    break
+            if not suppress:
+                cls_kept.append(item)
+        kept.extend(cls_kept)
+
+    return kept
 
 
 def get_detector(

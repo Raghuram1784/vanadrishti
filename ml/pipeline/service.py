@@ -38,7 +38,7 @@ class FrameAnalyzer:
                 rivals = [c for c in candidates
                           if {item['class'], c['class']} == {'animal', 'person'}
                           and c['confidence'] >= max(.10, item['confidence'] * .5)
-                          and box_iou(item['bbox'], c['bbox']) >= .5]
+                          and (box_iou(item['bbox'], c['bbox']) >= .5 or box_ios(item['bbox'], c['bbox']) >= .65)]
                 if rivals:
                     detection.update(uncertain=True,
                         uncertainty_reason='Competing animal and person signals. Ranger review recommended.',
@@ -68,3 +68,12 @@ def box_iou(a, b):
     intersection = max(0, x2 - x1) * max(0, y2 - y1)
     union = (a[2]-a[0])*(a[3]-a[1]) + (b[2]-b[0])*(b[3]-b[1]) - intersection
     return intersection / union if union > 0 else 0
+
+
+def box_ios(a, b):
+    x1, y1, x2, y2 = max(a[0], b[0]), max(a[1], b[1]), min(a[2], b[2]), min(a[3], b[3])
+    intersection = max(0, x2 - x1) * max(0, y2 - y1)
+    area_a = (a[2]-a[0])*(a[3]-a[1])
+    area_b = (b[2]-b[0])*(b[3]-b[1])
+    min_area = min(area_a, area_b)
+    return intersection / min_area if min_area > 0 else 0
