@@ -7,7 +7,8 @@ import numpy as np
 from PIL import Image, ImageOps, UnidentifiedImageError
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from backend.schemas.api import AnalysisResponse
-from backend.services.context_service import DEMO_CAMERA_ID
+from backend.services.context_service import DEMO_CAMERA_ID, local_timestamp
+from ml.pipeline import analyze_frame, FrameStatus
 
 router = APIRouter(prefix='/api', tags=['analysis'])
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
@@ -56,9 +57,14 @@ def analyze_image(request: Request, file: UploadFile = File(...),
             raise HTTPException(422, 'Invalid timestamp; use an ISO datetime') from None
     frame, original_bytes = decode_image(file)
     try:
-        detections = request.app.state.vision.analyze(frame)
+        analysis = analyze_frame(frame, selected, {'captured_at': local_timestamp(parsed)},
+                                 inference=request.app.state.vision.analyze)
+        if analysis.status in (FrameStatus.INFERENCE_ERROR, FrameStatus.INVALID_FRAME):
+            raise RuntimeError('Frame analysis failed')
+        detections = [d.model_dump() for d in analysis.detections]
     except Exception:
         logging.getLogger(__name__).exception('Vision inference failed')
         raise HTTPException(503, 'Vision model unavailable or inference failed; check server logs') from None
-    return request.app.state.context.analyze(detections, selected, parsed, authorized_patrol,
-                                            evidence_bytes=original_bytes)
+    result = request.app.state.context.analyze(detections, selected, parsed, authorized_patrol,
+                                               evidence_bytes=original_bytes)
+    return {**result, 'frame_analysis': analysis}

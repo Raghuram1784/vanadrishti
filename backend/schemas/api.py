@@ -1,35 +1,11 @@
 """Public API contracts; species scores are rankings only."""
 from typing import Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from ml.pipeline.models import (
+    Detection, Species, SpeciesCandidate, CandidateSignal, FrameAnalysisResult, ObjectType,
+)
 
-ObjectType = Literal['animal', 'person', 'vehicle']
 AlertStatus = Literal['NEW', 'REVIEWING', 'PATROL_ASSIGNED', 'FALSE_ALARM', 'ESCALATED', 'RESOLVED']
-
-
-class SpeciesCandidate(BaseModel):
-    label: str
-    ranking_score: float
-
-
-class Species(BaseModel):
-    top1: str
-    ranking_score: float
-    top3: list[SpeciesCandidate]
-
-
-class CandidateSignal(BaseModel):
-    type: ObjectType
-    score: float
-
-
-class Detection(BaseModel):
-    uncertain: bool = False
-    uncertainty_reason: str | None = None
-    candidate_signals: list[CandidateSignal] = Field(default_factory=list)
-    type: ObjectType
-    score: float
-    bbox: list[float] | None = Field(default=None, description='Normalized x1,y1,x2,y2 coordinates')
-    species: Species | None = None
 
 
 class Risk(BaseModel):
@@ -41,6 +17,7 @@ class Risk(BaseModel):
 
 
 class AnalysisResponse(BaseModel):
+    frame_analysis: FrameAnalysisResult | None = None
     event_id: str
     timestamp: str
     simulated: Literal[True] = True
@@ -112,6 +89,7 @@ class RecentActivity(BaseModel):
 
 
 class LiveFrameResponse(BaseModel):
+    frame_analysis: FrameAnalysisResult | None = None
     event_state: EventState
     event_id: str | None = None
     timestamp: str

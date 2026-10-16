@@ -1,0 +1,33 @@
+{
+  "model": "MDV6-yolov10-c",
+  "device": "cpu",
+  "seed": 42,
+  "torch_threads": 1,
+  "deterministic_algorithms": true,
+  "iou_threshold": 0.5,
+  "global_threshold": 0.2,
+  "class_thresholds": {
+    "animal": 0.2,
+    "person": 0.25,
+    "vehicle": 0.5
+  },
+  "count": 60,
+  "historical_successes": 55,
+  "bgr_successes": 55,
+  "legacy_rgb_successes": 56,
+  "color_differences": [
+    "WildBoar410.jpg"
+  ],
+  "historical_differences": [],
+  "python": "3.14.0",
+  "packages": {
+    "torch": "2.10.0",
+    "ultralytics": "8.4.174",
+    "PytorchWildlife": "1.3.0",
+    "opencv-python": "4.13.0.92"
+  },
+  "quality_ms_median": 7.84159999784606,
+  "detector_ms_median": 297.1000500001537,
+  "latency_scope": "CPU detector only, first sample includes warmup; quality uses <=640px long edge. No BioCLIP or HTTP timing.",
+  "historical_56_run": "Original per-image 56/60 report not found; legacy conversion is a controlled reconstruction, not historical proof."
+}

@@ -2,6 +2,7 @@ from datetime import datetime
 import logging
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from backend.api.analyze import decode_image
+from ml.pipeline import analyze_frame, FrameStatus
 from backend.services.context_service import camera_payload, DISCLAIMER, local_timestamp
 from backend.schemas.api import (
     CreateSessionRequest,
@@ -114,7 +115,11 @@ def live_frame(
         sessions.record_frame_received(camera_id, session_id=session_id)
 
     try:
-        detections = request.app.state.vision.analyze(frame)
+        analysis = analyze_frame(frame, camera_id, {'captured_at': ts},
+                                 inference=request.app.state.vision.analyze)
+        if analysis.status in (FrameStatus.INFERENCE_ERROR, FrameStatus.INVALID_FRAME):
+            raise RuntimeError('Frame analysis failed')
+        detections = [d.model_dump() for d in analysis.detections]
     except Exception:
         logging.getLogger(__name__).exception('Vision inference failed on live frame')
         raise HTTPException(503, 'Vision model unavailable or inference failed') from None
@@ -140,6 +145,7 @@ def live_frame(
     if not confirmed:
         recent_activity = sessions.get_recent_activity(camera_id, current_time=ts) if sessions else None
         return LiveFrameResponse(
+            frame_analysis=analysis,
             event_state='UNCERTAIN_DETECTION' if detections else 'NO_DETECTION',
             event_id=None,
             timestamp=ts.isoformat(),
@@ -195,6 +201,7 @@ def live_frame(
         ) if sessions else None
 
         return LiveFrameResponse(
+            frame_analysis=analysis,
             event_state='CONTINUATION',
             event_id=existing_event_id,
             timestamp=assessment['timestamp'],
@@ -236,6 +243,7 @@ def live_frame(
     ) if sessions else None
 
     return LiveFrameResponse(
+        frame_analysis=analysis,
         event_state='NEW',
         event_id=entry['event_id'],
         timestamp=entry['timestamp'],
