@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLiveCamera } from "./useLaptopCamera";
 import { Button } from "@/components/ui/button";
 import { UncertaintyNotice, detectionLabel } from "@/components/analysis/UncertaintyNotice";
+import { DetectionImage } from "@/components/analysis/DetectionImage";
 import {
   Camera,
   Play,
@@ -314,11 +315,10 @@ export function MobileCameraPanel() {
 
           {cam.analyzedFrameUrl ? (
             <div className="space-y-4">
-              <div className="relative aspect-video bg-black rounded-lg overflow-hidden border border-slate-800">
-                <img
-                  src={cam.analyzedFrameUrl}
-                  alt="C-21 Analyzed Sample"
-                  className="w-full h-full object-contain"
+              <div className="analyzed-frame-wrap mobile-analyzed-wrap">
+                <DetectionImage
+                  url={cam.analyzedFrameUrl}
+                  detections={cam.latestResult?.detections || []}
                 />
               </div>
 
