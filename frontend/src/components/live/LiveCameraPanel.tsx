@@ -108,6 +108,8 @@ export function LiveCameraPanel() {
             <div><dt>Video resolution</dt><dd>{diagnostics.resolution}</dd></div>
             <div><dt>Camera permission</dt><dd>{diagnostics.permission}</dd></div>
             <div><dt>Startup / failure stage</dt><dd>{diagnostics.stage}</dd></div>
+            <div><dt>Sampling stage</dt><dd>{diagnostics.sampleStage || "Idle"}</dd></div>
+            <div><dt>Sampling error</dt><dd>{diagnostics.sampleError || "None"}</dd></div>
             <div><dt>Constraint attempted</dt><dd>{diagnostics.attempt}</dd></div>
             <div><dt>Error name</dt><dd>{diagnostics.errorName}</dd></div>
           </dl>

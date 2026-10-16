@@ -1,3 +1,4 @@
+import { uploadCameraFrame, type FrameRequestOptions } from './frameRequest';
 import type {
   Alert,
   AlertStatus,
@@ -8,7 +9,6 @@ import type {
   Event,
   EventFilters,
   Health,
-  LiveFrameResponse,
 } from "@/types/api";
 const BASE = (
   import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"
@@ -127,9 +127,5 @@ export const closeCameraSession = (cameraId: string, sessionId: string) =>
 export const getCameraSessions = () =>
   request<CameraSession[]>("/api/camera-sessions");
 
-export const postCameraFrame = (cameraId: string, form: FormData) =>
-  request<LiveFrameResponse>(
-    `/api/cameras/${encodeURIComponent(cameraId)}/frame`,
-    { method: "POST", body: form },
-    600000,
-  );
+export const postCameraFrame = (cameraId: string, form: FormData, options?: FrameRequestOptions) =>
+  uploadCameraFrame(`${BASE}/api/cameras/${encodeURIComponent(cameraId)}/frame`, form, options);
